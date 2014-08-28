@@ -67,35 +67,53 @@ The second constraint simply states that the final total amount of each good can
 
 \subsection{Fisher is a special case of Arrow-Debreu}
 
+\section{Existence of equilibria}
+Cite original papers for arrow-debreu result.
+fisher existence follows from being a special case.
+
+Existence is one thing. We know consider the question of computability.
+
 \section{Convex formulation, equilibrium, and optimality conditions}
 \subsection{Fisher}
 \subsection{Arrow-Debreu}
-It can be shown that a market equilibrium always exists and can be found by solving the
-following problem:
+It can be shown that a market equilibrium always exists and can be found by solving the problem
 
 \[
 \begin{array}{ll}
 \mbox{find} & x, p \\
-\mbox{subject to} & \sum_k a_{ik} x_{ik} \geq a_{ij} \sum_k b_{ik} \frac{p_k}{p_j}, \forall i,j\\
-& \sum_i x_{ij} = \sum_i b_{ij}, \forall j\\
-& x_{ij} \geq 0, p_j \geq 0
+\mbox{subject to} & u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} \frac{p_k}{p_j}, \forall i,j\\
+& \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
+& x_{ij} \geq 0, p_j \geq 0.
 \end{array}
 \]
 
 
-The above problem is not a convex optimization problem but can be easily transformed to one by a simple change of variables. Specifically let $p_j = \exp(\phi_j)$.
+The above problem is not convex but can be easily transformed by a simple change of variables. Specifically, let $p_j = \exp(\phi_j)$.
 Then the problem becomes
 
 \[
 \begin{array}{ll}
 \mbox{find} & x, \phi \\
-\mbox{subject to} & \sum_k a_{ik} x_{ik} \geq a_{ij} \sum_k b_{ik} e^{\phi_k - \phi_j}, \forall i,j\\
-& \sum_i x_{ij} = \sum_i b_{ij}, \forall j\\
-& x_{ij} \geq 0
+\mbox{subject to} &  u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} e^{\phi_k - \phi_j}, \forall i,j\\
+& \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
+& x_{ij} \geq 0.
 \end{array}
 \]
 
 This is a convex feasibility problem and can be solved in a variety of ways.
+Throughout the remainder, we'll use the following formulation:
+
+\[
+\begin{array}{ll}
+\mbox{find} & x, \phi \\
+\mbox{subject to} & \log(u_i(x_i)^T x_i) + \phi_j \geq  \log(\nabla_j u_i(x_i)) +  \log(\sum_k b_{ik} e^{\phi_k}), \forall i,j\\
+& \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
+& x_{ij} \geq 0.
+\end{array}
+\]
+
+Note that the first constraint need only be explicitly formed when $\nabla_j u_i(x_i) > 0$, and we only need to include terms in the sum in
+$\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used later when we exploit sparsity to solve these problems efficiently.
 
 \subsection{Alternative formulations}
 any benefit to these? XXX: cite
@@ -103,6 +121,11 @@ any benefit to these? XXX: cite
 \section{Utility functions}
 \subsection{Definitions}
 homothetic, homogeneous, log-concave
+
+\subsection{Transformations}
+We can transform any homothetic, etc function to a homogeneous function
+through the transformation given by \cite{jain2005market}.
+Is this transformation of any practical value?
 
 
 \subsection{Arrow-Debreu}
@@ -128,6 +151,10 @@ can i approximate the exponential cone to do an approximate prox evaluation
 at each step, allowing for SOCP solvers that can't handle exponential cones?
 
 \section{Huge, distributed models}
+
+\newpage
+\bibliographystyle{alpha}
+\bibliography{bibliography.bib}
 \end{document}
 
 
