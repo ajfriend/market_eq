@@ -1,0 +1,28 @@
+%% Testing this waterfilling idea
+rand('state',4)
+
+n = 5;
+y = rand(n,1); c = 0.3;
+
+% Get solution
+cvx_begin
+    variable x(n)
+    minimize(norm(x-y,2))
+    subject to
+        x>=0
+        sum(x)==c
+cvx_end
+
+% Try waterfilling
+delta = sum(y)-c;
+x2 = y; k = n;
+
+    x2 = x2 - min(min(x2),delta/k)*ones(n,1)
+    x2(x2<0) = 0;
+    k = k-1;
+    delta = sum(x2)-c;
+end
+
+x2
+    
+x

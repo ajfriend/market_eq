@@ -1,0 +1,83 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Computing market equilibria via convex optimization}
+\author{AJ Friend \and Stephen Boyd}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Market definitions}
+\subsection{Arrow-Debreu}
+
+\subsection{Fisher}
+
+\section{Convex formulation, equilibrium, and optimality conditions}
+\subsection{Fisher}
+\subsection{Arrow-Debreu}
+\subsection{Alternative formulations}
+any benefit to these? XXX: cite
+
+\section{Utility functions}
+\subsection{Definitions}
+homothetic, homogeneous, log-concave
+
+
+\subsection{Arrow-Debreu}
+what work, what are representable
+\begin{itemize}
+\item complicated CES functions, nested, etc..
+\item rational powers represented through SOCP
+\end{itemize}
+\subsection{Fisher}
+can we transform homothetic to homogeneous of degree 1? or is that transformation completely non-constructive?
+
+\subsection{Models with production?}
+should we include?
+
+\section{Solution methods}
+
+\subsection{CVXPY and SCS}
+\subsection{Exploiting sparsity}
+\subsection{Splitting}
+\subsection{Cutting plane}
+\subsection{Approximations?}
+can i approximate the exponential cone to do an approximate prox evaluation
+at each step, allowing for SOCP solvers that can't handle exponential cones?
+
+\section{Huge, distributed models}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
