@@ -1,6 +1,8 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 
+\input defs.tex
+
 \title{Computing market equilibria via convex optimization}
 \author{AJ Friend \and Stephen Boyd}
 \date{\today}
@@ -14,11 +16,87 @@
 \section{Market definitions}
 \subsection{Arrow-Debreu}
 
+An Arrow-Debreu market has $m$ agents and $n$ goods where
+agent $i$ has an initial amount $b_{ij} \in \reals_+$ of good $j$.
+Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \mathbf{R}^m_{+}$. That is, he is allocated amount $x_{ij}$ of good $j$.
+Generally, $u_i$ is a concave, increasing function.
+
+Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial goods and buy a bundle of goods $x_i$ to maximize his utility. That is, agent $i$ solves the optimization problem
+\[
+\begin{array}{ll}
+\mbox{maximize} & u_i(x_i) \\
+\mbox{subject to} & p^T x_i \leq p^T b_i \\
+& x_i \geq 0.
+\end{array}
+\]
+
+The \emph{Arrow-Debreu market equilibrium problem} is to find prices $p$ and an allocation matrix $x \in \reals^{m \times n}$ (where $x_i^T$ is the $i$th row of $x$) such that the following are true:
+\begin{itemize}
+\item $x \geq 0$
+\item $\sum_{i=1}^m x_{ij} \leq \sum_{i=1}^m b_{ij}$
+\item each agent achieves his optimal utility for the given prices
+\end{itemize}
+
+The second constraint simply states that the final total amount of each good cannot exceed the initial total amount.
+
 \subsection{Fisher}
+
+A Fisher market has $m$ agents and $n$ goods where
+agent $i$ has an initial amount of money $w_i \in \reals_+$.
+The total amount of good $j$ available for purchase is given by $b_j$.
+Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \mathbf{R}^m_{+}$. That is, he is allocated amount $x_{ij}$ of good $j$.
+Generally, $u_i$ is a concave, increasing function.
+
+Given prices $p \in \reals^n_{++}$ for each good, agent $i$ uses his initial money $w_i$ to buy a bundle of goods $x_i$ to maximize his utility. That is, agent $i$ solves the optimization problem
+\[
+\begin{array}{ll}
+\mbox{maximize} & u_i(x_i) \\
+\mbox{subject to} & p^T x_i \leq w_i \\
+& x_i \geq 0.
+\end{array}
+\]
+
+The \emph{Fisher market equilibrium problem} is to find prices $p$ and an allocation matrix $x \in \reals^{m \times n}$ (where $x_i^T$ is the $i$th row of $x$) such that the following are true:
+\begin{itemize}
+\item $x \geq 0$
+\item $\sum_{i=1}^m x_{ij} \leq b_j$
+\item each agent achieves his optimal utility for the given prices
+\end{itemize}
+
+The second constraint simply states that the final total amount of each good cannot exceed the initial available amount.
+
+\subsection{Fisher is a special case of Arrow-Debreu}
 
 \section{Convex formulation, equilibrium, and optimality conditions}
 \subsection{Fisher}
 \subsection{Arrow-Debreu}
+It can be shown that a market equilibrium always exists and can be found by solving the
+following problem:
+
+\[
+\begin{array}{ll}
+\mbox{find} & x, p \\
+\mbox{subject to} & \sum_k a_{ik} x_{ik} \geq a_{ij} \sum_k b_{ik} \frac{p_k}{p_j}, \forall i,j\\
+& \sum_i x_{ij} = \sum_i b_{ij}, \forall j\\
+& x_{ij} \geq 0, p_j \geq 0
+\end{array}
+\]
+
+
+The above problem is not a convex optimization problem but can be easily transformed to one by a simple change of variables. Specifically let $p_j = \exp(\phi_j)$.
+Then the problem becomes
+
+\[
+\begin{array}{ll}
+\mbox{find} & x, \phi \\
+\mbox{subject to} & \sum_k a_{ik} x_{ik} \geq a_{ij} \sum_k b_{ik} e^{\phi_k - \phi_j}, \forall i,j\\
+& \sum_i x_{ij} = \sum_i b_{ij}, \forall j\\
+& x_{ij} \geq 0
+\end{array}
+\]
+
+This is a convex feasibility problem and can be solved in a variety of ways.
+
 \subsection{Alternative formulations}
 any benefit to these? XXX: cite
 
