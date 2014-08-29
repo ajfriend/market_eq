@@ -39,6 +39,9 @@ The \emph{Arrow-Debreu market equilibrium problem} is to find prices $p$ and an 
 
 The second constraint simply states that the final total amount of each good cannot exceed the initial total amount.
 
+Arrow and Debreu showed that equilibrium prices exist in the general case that
+utilities are concave \cite{arrow1954existence}. However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
+
 \subsection{Fisher}
 
 A Fisher market has $m$ agents and $n$ goods where
@@ -65,7 +68,16 @@ The \emph{Fisher market equilibrium problem} is to find prices $p$ and an alloca
 
 The second constraint simply states that the final total amount of each good cannot exceed the initial available amount.
 
+Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation
+for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1. Jain et al. \cite{jain2005market} generalized this model to handle homothetic and quasi-concave utilities. Examples of these utilities were introduced by Friedman \cite{friedman1973concavity}. XXX: does Jain's stuff only apply to Fisher markets?
+
 \subsection{Fisher is a special case of Arrow-Debreu}
+two different transformations for this
+\begin{itemize}
+\item add an agent and a single good (money)
+\item make the initial endowment for each agent proportional,
+so each agent has a constant proportion between goods, but some agents have more total goods than others. 
+\end{itemize}
 
 \section{Existence of equilibria}
 Cite original papers for arrow-debreu result.
@@ -74,7 +86,26 @@ fisher existence follows from being a special case.
 Existence is one thing. We know consider the question of computability.
 
 \section{Convex formulation, equilibrium, and optimality conditions}
+The convex minimization formulation for Fisher markets is given by \cite{eisenberg1961aggregation}.
+
+The convex feasibility formulation for Fisher and Arrow-Debreu markets is given in \cite{chen2010equilibrium}.
+
+XXX: what were the computational approaches for Arrow-Debreu before \cite{chen2010equilibrium}?
+
 \subsection{Fisher}
+
+The Fisher equilibrium problem is solved by the following convex program when the utility functions are concave and homogeneous of degree 1 \cite{nisan2007algorithmic}, Section 6.2 for the optimality conditions and proof:
+
+\[
+\begin{array}{ll}
+\mbox{maximize} & \sum_{i=1}^m \log u_i(x_i) \\
+\mbox{subject to} & \sum_{i=1}^m x_{ij} \leq b_j, \quad \forall j\\
+& x \geq 0.
+\end{array}
+\]
+
+Here, the prices appear as dual variables.
+
 \subsection{Arrow-Debreu}
 It can be shown that a market equilibrium always exists and can be found by solving the problem
 
@@ -120,7 +151,27 @@ any benefit to these? XXX: cite
 
 \section{Utility functions}
 \subsection{Definitions}
-homothetic, homogeneous, log-concave
+A utility function $u: \reals^n_+ \to \reals_+$ is \emph{homothetic} if for any $\alpha > 0$ we have that $u(x) \geq u(y)$ if and only if
+$u(\alpha x) \geq u(\alpha y)$.
+The utility function is \emph{monotone} if $x \geq y$ implies that $u(x) \geq u(y)$.
+It is \emph{homogeneous} of degree $d$ if for any $\alpha > 0$,
+$u(\alpha x) = \alpha^d u(x)$.
+
+\subsection{Examples}
+\begin{itemize}
+\item linear
+\item Cobb-Douglas $u_i(x) = \prod_{j=1}^{n} x_j^{a_j}$ where $\sum_j a_j = 1$
+\item Leontief $u_i(x) = \min_j a_j x_j$ (special case of piecewise linear concave)
+\item CES constant elasticity of substitution have form
+$u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}$ for $-\infty < \rho <1, \rho \neq 0$. May not be convex when $\rho \leq -1$.
+\item nested CES functions. see \cite{shoven1992applying} for examples and applications. XXX: when is CES convex? nested is convex?
+\item 'VES' functions  $u_i(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
+\item piecewise concave linear functions $\min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0$
+\item $u(x) = \sum_{j=1}^n a_j (x_j+ b_j)^{d_j}$, for $a_j, b_j \geq 0$ and $0 \leq d_j \leq 1$
+\item $u(x) = \sum_{j=1}^n a_j \log(x_j+ b_j)$, for $a_j, b_j \geq 0$
+\end{itemize}
+
+Note that these last two need not be homothetic. Consider $u(x,y) = \sqrt{x} + y$.
 
 \subsection{Transformations}
 We can transform any homothetic, etc function to a homogeneous function
@@ -138,17 +189,24 @@ what work, what are representable
 can we transform homothetic to homogeneous of degree 1? or is that transformation completely non-constructive?
 
 \subsection{Models with production?}
-should we include?
+should we include? \cite{jain2005market} has some references.
+\cite{nisan2007algorithmic} discusses computation for markets and models with production in chapters 5 and 6. Specifically, see section 6.6. These also emit convex formulations.
 
 \section{Solution methods}
 
 \subsection{CVXPY and SCS}
 \subsection{Exploiting sparsity}
 \subsection{Splitting}
+handle splitting over agents, and also splitting over constraints. over agents needs no multiplication of variables, splitting over constraints does. find a prox regime that handles both easily.
+
+inspect dual variables to guarantee some allocations are zero? this allows us to throw them out of the problem as we iterate.
+
 \subsection{Cutting plane}
 \subsection{Approximations?}
 can i approximate the exponential cone to do an approximate prox evaluation
 at each step, allowing for SOCP solvers that can't handle exponential cones?
+
+what if we approximate everything with a quadratic around the current iterate for an approximate projection? subset or superset of actual agent cutting set? does this simplification make updates with an analytic form, allowing for very fast iteration?
 
 \section{Huge, distributed models}
 
