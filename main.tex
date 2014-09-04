@@ -39,8 +39,7 @@ The \emph{Arrow-Debreu market equilibrium problem} is to find prices $p$ and an 
 
 The second constraint simply states that the final total amount of each good cannot exceed the initial total amount.
 
-Arrow and Debreu showed that equilibrium prices exist in the general case that
-utilities are concave \cite{arrow1954existence}. However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
+Arrow and Debreu showed that equilibrium prices exist in the general case of concave utility functions \cite{arrow1954existence}. However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
 
 \subsection{Fisher}
 
@@ -68,8 +67,7 @@ The \emph{Fisher market equilibrium problem} is to find prices $p$ and an alloca
 
 The second constraint simply states that the final total amount of each good cannot exceed the initial available amount.
 
-Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation
-for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1. Jain et al. \cite{jain2005market} generalized this model to handle homothetic and quasi-concave utilities. Examples of these utilities were introduced by Friedman \cite{friedman1973concavity}. XXX: does Jain's stuff only apply to Fisher markets?
+
 
 \subsection{Fisher is a special case of Arrow-Debreu}
 two different transformations for this
@@ -80,11 +78,29 @@ so each agent has a constant proportion between goods, but some agents have more
 \end{itemize}
 
 \section{Existence of equilibria}
-Cite original papers for arrow-debreu result.
-fisher existence follows from being a special case.
+As the Fisher problem is a special case of Arrow-Debreu, all existence and computational results carry over.
 
-Ye claims that \cite{arrow1954existence} shows that an arrow-debreu equilibrium exists simply when the utilities are concave.
-Existence is one thing. We know consider the question of computability.
+Arrow and Debreu \cite{arrow1954existence} showed that an Arrow-Debreu equilibrium exists in the case of concave utilities. 
+However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
+
+Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation
+for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1.
+Jain et al. \cite{jain2005market} generalized this model to handle homothetic and quasi-concave utilities.
+Examples of these utilities were introduced by Friedman \cite{friedman1973concavity}.
+XXX: it is unclear if the transformation given in \cite{jain2005market} is of practical value.
+
+An approximation scheme for the Arrow-Debreu setting was developed by Newman and Primak \cite{newman1992complexity}, based on the work by Arrow, Block, and Hurwicz \cite{arrow1958stability}. A good overview of these methods can be found in \cite{codenotti2005polynomial}. These methods work for a large class of utility functions satisfying the gross substitutability property. They also show that the equilibria form a convex set when utilities satisfy gross substitutability, suggesting that they may be computationally approachable. The methods utilize a cutting plane property of the GS functions and result in infinite linear programs. XXX: this may be useful for us to investigate
+
+Even though we have a proof that the equilibria are given by a convex set, these problems may not be easily solved with convex optimization. The formulations for the Arrow-Debreu problem given in \cite{jain2007polynomial,chen2010equilibrium} only remain convex for a subset of utility functions, which we will discuss below. Indeed, even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}.
+It is shown in \cite{codenotti2006leontief} that the Arrow-Debreu problem with Leontief utilities is NP-hard.
+
+Jain \cite{jain2007polynomial} gives an optimization program which characterizes all equilibrium in the Arrow-Deberu setting. However, this program is only convex for a subset of utility functions \cite{chen2010equilibrium}. xxx: combining this non-convex setting with the GS cutting plane algorithm could be interesting.
+
+XXX: \cite{mas1995microeconomic}, p. 608 shows that WGS and WARP markets have convex equilibria.
+
+Codenotti et allxx \cite{codenotti2005market} writes down a different convex program which covers a wider range of CES functions ($-1 \leq \rho < 0$).
+
+We know consider the question of computability.
 
 \subsection{Important theoretical results}
 \begin{itemize}

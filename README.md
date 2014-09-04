@@ -31,6 +31,7 @@
 
 # Mon Sep  1 23:21:42 2014
 - some CES functions work for Arrow-Debreu, but might require a different convex program. look at section 6.4.2 in Algorithmic Game Theory
+- also look at Market Equilibrium for CES Exchange Economies: Existence, Multiplicity, and Computation 
 - look at CS294 lecture 7 notes. gives CES arrow debreu for -1 <= \rho < 0
 - the lecture 7 notes seem to give the arrow-debreu in terms of a demand function for each agent. is this a reasonable convex formulation? would it work for other utilities besides CES?
 - does the cutting plane give us something like the infinite LP?
@@ -45,6 +46,31 @@
 # Wed Sep  3 21:00:52 2014
 ## arrow-debreu formulation
 - note that \nabla u(x) ^T x is u(x) for homogeneous functions. does this extend what functions work for the arrow-debreu case
+
+## infinite LP
+- reading the 2007 version of Jain's paper points out some infinite LP formulations for exchange market for very general utility functions.
+- Jain07 points to On the Polynomial Time Computation of Equilibria for Certain Exchange Economies as a good reference
+- also maybe look at D. J. Newman and M. E. Primak, Complexity of circumscribed and inscribed ellipsoid methods for solving equilibrium models,
+- this might just be the cutting plane interpretation
+- i wonder if this scales?
+
+## if this infinite LP/cutting plane method works
+- lets just do it, see how it does
+- it will probably be slow, but perhaps we can use a heuristic to choose
+search directions
+- use something like the reweighting of the aggregate social function,
+or a convex approximate of arrow-debreu
+
+## jain07
+- jain07 gives an exponential or infinite LP or convex program involving cycles in graph
+- i think this is different from the classical infinite LP...
+- jain also shows that with general concave utilities, the usual Ye characterization is nonconvex, but does capture all the market equilibria
+- can we combine this with the infinite LP cutting plane algo?
+- of course, with general utilities, the equilibrium may not even be connected
+- i think they are only connected when you have gross substitutability
+
+## guy's thesis
+- the guys thesis on this stuff actually looks like a really good review of modern approaches.
 
 # viz
 - http://www.madhavajay.com/kalki/
