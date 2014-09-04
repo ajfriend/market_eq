@@ -83,7 +83,18 @@ so each agent has a constant proportion between goods, but some agents have more
 Cite original papers for arrow-debreu result.
 fisher existence follows from being a special case.
 
+Ye claims that \cite{arrow1954existence} shows that an arrow-debreu equilibrium exists simply when the utilities are concave.
 Existence is one thing. We know consider the question of computability.
+
+\subsection{Important theoretical results}
+\begin{itemize}
+\item fixed point equilibrium for general arrow-debreu case (not computable)
+\item arrow-debreu is given by welfare system with unknown weights
+\item cutting planes given in case of gross substitutability
+\item infinite LP formulation
+\item transform any homothetic to homogeneous?
+\end{itemize}
+
 
 \section{Convex formulation, equilibrium, and optimality conditions}
 The convex minimization formulation for Fisher markets is given by \cite{eisenberg1961aggregation}.
@@ -91,6 +102,9 @@ The convex minimization formulation for Fisher markets is given by \cite{eisenbe
 The convex feasibility formulation for Fisher and Arrow-Debreu markets is given in \cite{chen2010equilibrium}.
 
 XXX: what were the computational approaches for Arrow-Debreu before \cite{chen2010equilibrium}?
+
+Jain \cite{jain2007polynomial} showed the Arrow-Debreu market as a convex problem.
+XXX: This looks like a good paper to read thoroughly. 
 
 \subsection{Fisher}
 
@@ -112,7 +126,7 @@ It can be shown that a market equilibrium always exists and can be found by solv
 \[
 \begin{array}{ll}
 \mbox{find} & x, p \\
-\mbox{subject to} & u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} \frac{p_k}{p_j}, \forall i,j\\
+\mbox{subject to} & \nabla u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} \frac{p_k}{p_j}, \forall i,j\\
 & \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
 & x_{ij} \geq 0, p_j \geq 0.
 \end{array}
@@ -125,7 +139,7 @@ Then the problem becomes
 \[
 \begin{array}{ll}
 \mbox{find} & x, \phi \\
-\mbox{subject to} &  u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} e^{\phi_k - \phi_j}, \forall i,j\\
+\mbox{subject to} & \nabla u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} e^{\phi_k - \phi_j}, \forall i,j\\
 & \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
 & x_{ij} \geq 0.
 \end{array}
@@ -137,7 +151,7 @@ Throughout the remainder, we'll use the following formulation:
 \[
 \begin{array}{ll}
 \mbox{find} & x, \phi \\
-\mbox{subject to} & \log(u_i(x_i)^T x_i) + \phi_j \geq  \log(\nabla_j u_i(x_i)) +  \log(\sum_k b_{ik} e^{\phi_k}), \forall i,j\\
+\mbox{subject to} & \log(\nabla u_i(x_i)^T x_i) + \phi_j \geq  \log(\nabla_j u_i(x_i)) +  \log(\sum_k b_{ik} e^{\phi_k}), \forall i,j\\
 & \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
 & x_{ij} \geq 0.
 \end{array}
@@ -148,6 +162,7 @@ $\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used lat
 
 \subsection{Alternative formulations}
 any benefit to these? XXX: cite
+there is the Codenotti CES formulation for Arrow-Debreu that extends it to values $-1 \leq \rho < 0$. are there other ways to incorporate demand functions?
 
 \section{Utility functions}
 \subsection{Definitions}
@@ -163,7 +178,7 @@ $u(\alpha x) = \alpha^d u(x)$.
 \item Cobb-Douglas $u_i(x) = \prod_{j=1}^{n} x_j^{a_j}$ where $\sum_j a_j = 1$
 \item Leontief $u_i(x) = \min_j a_j x_j$ (special case of piecewise linear concave)
 \item CES constant elasticity of substitution have form
-$u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}$ for $-\infty < \rho <1, \rho \neq 0$. May not be convex when $\rho \leq -1$.
+$u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}$ for $-\infty < \rho <1, \rho \neq 0$. May not be convex when $\rho < -1$.
 \item nested CES functions. see \cite{shoven1992applying} for examples and applications. XXX: when is CES convex? nested is convex?
 \item 'VES' functions  $u_i(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
 \item piecewise concave linear functions $\min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0$
