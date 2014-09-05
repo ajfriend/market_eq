@@ -1,6 +1,15 @@
-PROJECT = main
+TARGETS = main.pdf
 
-all: $(PROJECT).pdf
+all: $(TARGETS)
+
+%.pdf: %.tex
+	pdflatex $*
+	bibtex $*
+	pdflatex $*
+	pdflatex $*
+	make clean
+
+main.pdf: bibliography.bib
 
 .PHONY: clean view purge
 
@@ -8,13 +17,7 @@ clean:
 	-rm *.aux *.blg *.out *.bbl *.log *.dvi
 
 purge: clean
-	-rm $(PROJECT).pdf
-
-$(PROJECT).pdf: $(PROJECT).tex bibliography.bib
-	pdflatex $(PROJECT).tex
-	bibtex $(PROJECT)
-	pdflatex $(PROJECT).tex
-	pdflatex $(PROJECT).tex
+	-rm $(TARGETS)
 
 view:
-	open $(PROJECT).pdf
+	open $(TARGETS)
