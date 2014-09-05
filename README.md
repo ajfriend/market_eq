@@ -72,6 +72,26 @@ or a convex approximate of arrow-debreu
 ## guy's thesis
 - the guys thesis on this stuff actually looks like a really good review of modern approaches.
 
+# Thu Sep  4 19:36:50 2014
+## reading On the Polynomial Time Computation of Equilibria for Certain Exchange Economies
+- the cutting planes are in the space of price vectors
+- but not in the log space we usually deal with in the Jain formulation
+- does that cause a problem?
+- using sparsity, many goods will be zero (demand and initial), so each agents evaluation will only depend on a subset of prices.
+- they use an Ellipsoid method, how well would this do with a cutting plane method?
+- we could combine the cutting plane method with convex approximations of
+demand to try and get better search directions.
+
+# Fri Sep  5 01:44:40 2014
+## its looking very likely that the Excess demand function is monotone
+- i think the cutting plane theorem is just a special case of the excess demand operator being monotone
+- need to check this
+- can we use that in an algorithm?
+
+## tatonnement
+- how hard is this computationally, really?
+- along with our experiments, we should compare it with tatonnement, which seems like a very natural algorithm that one would think would work well...
+
 # viz
 - http://www.madhavajay.com/kalki/
 - http://physics.stackexchange.com/questions/5569/is-there-a-nice-tool-to-plot-graphs-of-paper-citations

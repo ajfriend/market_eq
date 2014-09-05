@@ -211,6 +211,12 @@ Is this transformation of any practical value?
 
 
 \subsection{Arrow-Debreu}
+things that work are:
+\begin{itemize}
+\item linear
+\item CES with $\rho > 0$ (Codenotti may be able to write another program that handles $\rho < 0$.)
+\item Cobb-Douglas
+\end{itemize}
 what work, what are representable
 \begin{itemize}
 \item complicated CES functions, nested, etc..
@@ -222,6 +228,14 @@ can we transform homothetic to homogeneous of degree 1? or is that transformatio
 \subsection{Models with production?}
 should we include? \cite{jain2005market} has some references.
 \cite{nisan2007algorithmic} discusses computation for markets and models with production in chapters 5 and 6. Specifically, see section 6.6. These also emit convex formulations.
+
+\subsection{Other computational models}
+We'll only consider two computational models here. Other models exist and may be useful to consider in future work. Codenotti et al. \cite{codenotti2005polynomial} are able to work with more general utility functions in with an algorithm that involves producing cutting planes in the space of price vectors. XXX: can we rework the cutting plane constraints into a convex program?
+
+In \cite{codenotti2005marketCES, codenotti2005market}, the authors write down a different convex program for CES utilities with $-1 \leq \rho < 0$. I think the book \cite{nisan2007algorithmic} also covers this in chapter 5 or 6.
+
+Add in models with production.
+
 
 \section{Solution methods}
 
