@@ -19,5 +19,5 @@ clean:
 purge: clean
 	-rm $(TARGETS)
 
-view:
+view: $(TARGETS)
 	open $(TARGETS)
