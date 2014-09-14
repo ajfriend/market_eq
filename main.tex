@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{todonotes}
 
 \input defs.tex
 
@@ -11,6 +12,8 @@
 
 \maketitle
 
+\listoftodos
+
 \section{Introduction}
 
 \section{Market definitions}
@@ -18,10 +21,12 @@
 
 An Arrow-Debreu market has $m$ agents and $n$ goods where
 agent $i$ has an initial amount $b_{ij} \in \reals_+$ of good $j$.
-Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \mathbf{R}^m_{+}$. That is, he is allocated amount $x_{ij}$ of good $j$.
+Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \mathbf{R}^m_{+}$.
+That is, he is allocated amount $x_{ij}$ of good $j$.
 Generally, $u_i$ is a concave, increasing function.
 
-Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial goods and buy a bundle of goods $x_i$ to maximize his utility. That is, agent $i$ solves the optimization problem
+Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial goods and buy a bundle of goods $x_i$ to maximize his utility.
+That is, agent $i$ solves the optimization problem
 \[
 \begin{array}{ll}
 \mbox{maximize} & u_i(x_i) \\
@@ -38,8 +43,11 @@ The \emph{Arrow-Debreu market equilibrium problem} is to find prices $p$ and an 
 \end{itemize}
 
 The second constraint simply states that the final total amount of each good cannot exceed the initial total amount.
+This model is also referred to as the Walras model \cite{walras1896elements}, or the exchange model.
 
 Arrow and Debreu showed that equilibrium prices exist in the general case of concave utility functions \cite{arrow1954existence}. However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
+
+
 
 \subsection{Fisher}
 
@@ -78,53 +86,62 @@ so each agent has a constant proportion between goods, but some agents have more
 \end{itemize}
 
 \section{Existence of equilibria}
+\todo[inline]{Split into Arrow-Debreu and Fisher markets to make it clear which market these results are referring to}
+
 As the Fisher problem is a special case of Arrow-Debreu, all existence and computational results carry over.
 
 Arrow and Debreu \cite{arrow1954existence} showed that an Arrow-Debreu equilibrium exists in the case of concave utilities. 
 However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
 
-Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation
-for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1.
+For the case of Fisher markets,
+Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and
+Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1.
 Jain et al. \cite{jain2005market} generalized this model to handle homothetic and quasi-concave utilities.
-Examples of these utilities were introduced by Friedman \cite{friedman1973concavity}.
-XXX: it is unclear if the transformation given in \cite{jain2005market} is of practical value.
+Examples of these utilities were introduced by Friedman
+\cite{friedman1973concavity}.
+\todo{rephrase}However, it is unclear if the transformation given in \cite{jain2005market} is of practical use in a convex optimization setting.
 
-An approximation scheme for the Arrow-Debreu setting was developed by Newman and Primak \cite{newman1992complexity}, based on the work by Arrow, Block, and Hurwicz \cite{arrow1958stability}. A good overview of these methods can be found in \cite{codenotti2005polynomial}. These methods work for a large class of utility functions satisfying the gross substitutability property. They also show that the equilibria form a convex set when utilities satisfy gross substitutability, suggesting that they may be computationally approachable. The methods utilize a cutting plane property of the GS functions and result in infinite linear programs. XXX: this may be useful for us to investigate
+In the Arrow-Debreu setting, Arrow, Block, and Hurwicz \cite{arrow1958stability} show that, for a large class of utility functions satisfying the gross substitability property, a cutting plane can be obtained for the optimal prices.
+Also, \cite[p.~608]{mas1995microeconomic} shows that WGS and WARP Arrow-Debreu markets have convex equilibria.
+An immediate corellary of this result is that for markets with the GS property, the set of equilibrium prices is convex.
+This suggests that convex optimization may be useful to approach these problems.
+Newman and Primak \cite{newman1992complexity} used this result to develop an ellipsoid method for the Arrow-Debreu problem.
+A good overview of these ideas can be found in \cite{codenotti2005polynomial}.
 
-Even though we have a proof that the equilibria are given by a convex set, these problems may not be easily solved with convex optimization. The formulations for the Arrow-Debreu problem given in \cite{jain2007polynomial,chen2010equilibrium} only remain convex for a subset of utility functions, which we will discuss below. Indeed, even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}.
+Even though we have a proof that Arrow-Debreu equilibria are given by a convex set, these problems still may not be easily solved with convex optimization.
+The formulations for the Arrow-Debreu problem given in \cite{jain2007polynomial,chen2007note,chen2010equilibrium} only remain convex for a subset of utility functions, which we will discuss below.
+Indeed, even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}.
 It is shown in \cite{codenotti2006leontief} that the Arrow-Debreu problem with Leontief utilities is NP-hard.
 
-Jain \cite{jain2007polynomial} gives an optimization program which characterizes all equilibrium in the Arrow-Deberu setting. However, this program is only convex for a subset of utility functions \cite{chen2010equilibrium}. xxx: combining this non-convex setting with the GS cutting plane algorithm could be interesting.
+A good overview is found in \cite{mccune2009algorithmic}. The most modern reference to the cutting plane algorithm is \cite{mccune2007extending}.
+Negishi \cite{negishi1960welfare} shows that the exchange model equilibrium is given by a convex program whose objective is a linear combination of the utility functions, but with unknown weights.
 
-XXX: \cite{mas1995microeconomic}, p. 608 shows that WGS and WARP markets have convex equilibria.
+\subsection{Other market results}
 
-Codenotti et allxx \cite{codenotti2005market} writes down a different convex program which covers a wider range of CES functions ($-1 \leq \rho < 0$).
+Codenotti et all \cite{codenotti2005market, codenotti2005marketCES} write down a different convex program which covers a wider range of CES functions ($-1 \leq \rho < 0$) for Arrow-Debreu markets.
 
-We know consider the question of computability.
+Many authors have considered models with production. See \cite{garg2014computability} for recent results. Other sources are \cite{jain2005market} and \cite{codenotti2005marketExcess}. \todo[inline]{The latter of which also covers excess demand functions.}
 
-\subsection{Important theoretical results}
+\subsection{Interesting theoretical results}
 \begin{itemize}
-\item fixed point equilibrium for general arrow-debreu case (not computable)
 \item arrow-debreu is given by welfare system with unknown weights
-\item cutting planes given in case of gross substitutability
-\item infinite LP formulation
-\item transform any homothetic to homogeneous?
 \end{itemize}
 
 
 \section{Convex formulation, equilibrium, and optimality conditions}
 The convex minimization formulation for Fisher markets is given by \cite{eisenberg1961aggregation}.
 
-The convex feasibility formulation for Fisher and Arrow-Debreu markets is given in \cite{chen2010equilibrium}.
+The convex feasibility formulation for Fisher and Arrow-Debreu markets is given in \cite{chen2007note,chen2010equilibrium}.
 
-XXX: what were the computational approaches for Arrow-Debreu before \cite{chen2010equilibrium}?
+\todo[inline]{what were the computational approaches for Arrow-Debreu before
+\cite{chen2007note,chen2010equilibrium}?}
 
 Jain \cite{jain2007polynomial} showed the Arrow-Debreu market as a convex problem.
-XXX: This looks like a good paper to read thoroughly. 
 
 \subsection{Fisher}
 
-The Fisher equilibrium problem is solved by the following convex program when the utility functions are concave and homogeneous of degree 1 \cite{nisan2007algorithmic}, Section 6.2 for the optimality conditions and proof:
+The Fisher equilibrium problem is solved by the following convex program when the utility functions are concave and homogeneous of degree 1.
+See \cite[Section~6.2]{nisan2007algorithmic} for the optimality conditions and proof:
 
 \[
 \begin{array}{ll}
@@ -177,7 +194,7 @@ Note that the first constraint need only be explicitly formed when $\nabla_j u_i
 $\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used later when we exploit sparsity to solve these problems efficiently.
 
 \subsection{Alternative formulations}
-any benefit to these? XXX: cite
+any benefit to these? \todo{cite}
 there is the Codenotti CES formulation for Arrow-Debreu that extends it to values $-1 \leq \rho < 0$. are there other ways to incorporate demand functions?
 
 \section{Utility functions}
@@ -195,7 +212,7 @@ $u(\alpha x) = \alpha^d u(x)$.
 \item Leontief $u_i(x) = \min_j a_j x_j$ (special case of piecewise linear concave)
 \item CES constant elasticity of substitution have form
 $u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}$ for $-\infty < \rho <1, \rho \neq 0$. May not be convex when $\rho < -1$.
-\item nested CES functions. see \cite{shoven1992applying} for examples and applications. XXX: when is CES convex? nested is convex?
+\item nested CES functions. see \cite{shoven1992applying} for examples and applications.  \todo{when is CES convex? nested is convex?}
 \item 'VES' functions  $u_i(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
 \item piecewise concave linear functions $\min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0$
 \item $u(x) = \sum_{j=1}^n a_j (x_j+ b_j)^{d_j}$, for $a_j, b_j \geq 0$ and $0 \leq d_j \leq 1$
@@ -230,7 +247,7 @@ should we include? \cite{jain2005market} has some references.
 \cite{nisan2007algorithmic} discusses computation for markets and models with production in chapters 5 and 6. Specifically, see section 6.6. These also emit convex formulations.
 
 \subsection{Other computational models}
-We'll only consider two computational models here. Other models exist and may be useful to consider in future work. Codenotti et al. \cite{codenotti2005polynomial} are able to work with more general utility functions in with an algorithm that involves producing cutting planes in the space of price vectors. XXX: can we rework the cutting plane constraints into a convex program?
+We'll only consider two computational models here. Other models exist and may be useful to consider in future work. Codenotti et al. \cite{codenotti2005polynomial} are able to work with more general utility functions in with an algorithm that involves producing cutting planes in the space of price vectors. \todo[inline]{can we rework the cutting plane constraints into a convex program?}
 
 In \cite{codenotti2005marketCES, codenotti2005market}, the authors write down a different convex program for CES utilities with $-1 \leq \rho < 0$. I think the book \cite{nisan2007algorithmic} also covers this in chapter 5 or 6.
 
@@ -254,10 +271,12 @@ at each step, allowing for SOCP solvers that can't handle exponential cones?
 what if we approximate everything with a quadratic around the current iterate for an approximate projection? subset or superset of actual agent cutting set? does this simplification make updates with an analytic form, allowing for very fast iteration?
 
 \section{Huge, distributed models}
+\missingfigure{Add a yet to be made figure here.}
 
 \newpage
 \bibliographystyle{alpha}
 \bibliography{bibliography.bib}
+
 \end{document}
 
 

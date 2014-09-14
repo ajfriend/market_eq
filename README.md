@@ -92,6 +92,47 @@ demand to try and get better search directions.
 - how hard is this computationally, really?
 - along with our experiments, we should compare it with tatonnement, which seems like a very natural algorithm that one would think would work well...
 
+# Wed Sep 10 15:06:11 2014
+- computational approach. Have user determine type of market and give list of utility functions (objects). the market solver then determines which algorithm or framework to use to solve that market type
+- what happens if we take the dual of the fisher formulation? can we get a problem in a smaller parameter space, i.e., just the prices instead of the allocations?
+- should i add in a tatonnement section to computational approaches?
+
+# Wed Sep 10 20:18:19 2014
+- gives applications of general market equilibrium
+J. Whalley J.B. Shoven. Applying General Equilibrium. Cambridge University Press, 1992.
+
+# Thu Sep 11 00:37:41 2014
+- a short proof of existence of equilibria can be found in the following book
+- existence is a short proof
+- it also shows that gross substitutability implies unique prices
+Microeconomic analysis
+Varian, Hal R.
+3rd ed. - New York : Norton, 1992.
+Business Library
+Today's hours: 8a - 5p
+Stacks
+ Available HB172 .V35 1992
+ Available HB172 .V35 1992
+
+# Thu Sep 11 16:56:44 2014
+- read varian chapter 31 from pdf
+- read kreps pdf chapter 6
+
+# Fri Sep 12 11:32:45 2014
+## good books summary
+- varian (grad and undergrad books)
+- microeconomic theory by mas-colell, whinston, green
+- competitive equilibrium by ellickson
+- microeconomic theory by luenberger
+- a course in microeconomic theory by kreps
+
+## walras' law
+the value of the aggregate excess demand is zero
+
+## mccune thesis
+- check out smale's work on newton methods for the problem... woah, its from 1976
+- 
+
 # viz
 - http://www.madhavajay.com/kalki/
 - http://physics.stackexchange.com/questions/5569/is-there-a-nice-tool-to-plot-graphs-of-paper-citations
