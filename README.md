@@ -137,11 +137,8 @@ the value of the aggregate excess demand is zero
 - can we alternate between prices and weights to get a nice algorithm?
 - is the set of weights convex?
 
-# viz
-- http://www.madhavajay.com/kalki/
-- http://physics.stackexchange.com/questions/5569/is-there-a-nice-tool-to-plot-graphs-of-paper-citations
-- search: "google scholar graph"
-- http://academic.research.microsoft.com/
-- http://anrope.com/blog/2011/05/11/hey-google-scholar-where-is-my-citation-visualization-tool/
-- http://www-personal.umich.edu/~ferraris/googlescholarvisualization.html
-- http://hublog.hubmed.org/archives/001002.html
+# Sun Sep 14 22:59:26 2014
+- what about splitting buying and selling into different prox operators
+- it jives nicely as a way to move between fisher and arrow-debreu settings
+- could simplify the prox operators enough to not need an EXP solver
+
