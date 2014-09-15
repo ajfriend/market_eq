@@ -14,10 +14,10 @@ main.pdf: bibliography.bib
 .PHONY: clean view purge
 
 clean:
-	-rm *.aux *.blg *.out *.bbl *.log *.dvi
+	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi
 
 purge: clean
-	-rm $(TARGETS)
+	-@rm -rf $(TARGETS)
 
 view: $(TARGETS)
 	open $(TARGETS)

@@ -232,32 +232,55 @@ $\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used lat
 For each utility function, we'll list if it works in the Fisher setting, the convex formulation given by \cite{chen2010equilibrium}, or the cutting plane setting. List if homogeneous, GS or weak GS, and if demand is a function or a relation. if it satisfies walras' law, etc. Also, show how functions are representable in a DCP system.
 
 \subsection{Linear}
+\[
+u(x) = a^T x
+\]
 
 \subsection{Constant elasticity of substitution (CES)}
+CES constant elasticity of substitution have form
+\[
+u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho},
+\]
+where $-\infty < \rho < 1, \rho \neq 0$.
+May not be convex when $\rho < -1$.
 
+\subsection{Nested CES}
+see \cite{shoven1992applying} for examples and applications.  \todo{when is CES convex? nested is convex?}
 \subsection{Cobb-Douglas}
+\[
+u_i(x) = \prod_{j=1}^{n} x_j^{a_j},
+\]
+where $\sum_j a_j = 1$.
 
 \subsection{Leontief}
+\[
+u_i(x) = \min_j a_j x_j
+\]
 
+\subsection{Piecewise linear concave functions}
+\[
+\min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0
+\]
 \subsection{Fractional power}
+ \[
+ u(x) = \sum_{j=1}^n a_j (x_j+ b_j)^{d_j},
+ \]
+ where $a_j, b_j \geq 0$ and $0 \leq d_j \leq 1$.
+ Note that these need not be homothetic. Consider $u(x,y) = \sqrt{x} + y$.
 
 \subsection{Logarithmic}
+\[
+u(x) = \sum_{j=1}^n a_j \log(x_j+ b_j),
+\]
+where $a_j, b_j \geq 0$.  Note that these need not be homothetic.
 
-\subsection{Examples}
+\subsection{Other examples}
 \begin{itemize}
-\item linear
-\item Cobb-Douglas $u_i(x) = \prod_{j=1}^{n} x_j^{a_j}$ where $\sum_j a_j = 1$
-\item Leontief $u_i(x) = \min_j a_j x_j$ (special case of piecewise linear concave)
-\item CES constant elasticity of substitution have form
-$u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}$ for $-\infty < \rho <1, \rho \neq 0$. May not be convex when $\rho < -1$.
-\item nested CES functions. see \cite{shoven1992applying} for examples and applications.  \todo{when is CES convex? nested is convex?}
 \item 'VES' functions  $u_i(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
-\item piecewise concave linear functions $\min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0$
-\item $u(x) = \sum_{j=1}^n a_j (x_j+ b_j)^{d_j}$, for $a_j, b_j \geq 0$ and $0 \leq d_j \leq 1$
-\item $u(x) = \sum_{j=1}^n a_j \log(x_j+ b_j)$, for $a_j, b_j \geq 0$
+\item $\min(x_1,x_2) + \min(x_3,x_4)$
 \end{itemize}
 
-Note that these last two need not be homothetic. Consider $u(x,y) = \sqrt{x} + y$.
+
 
 
 \subsection{Arrow-Debreu}
