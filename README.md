@@ -142,3 +142,6 @@ the value of the aggregate excess demand is zero
 - it jives nicely as a way to move between fisher and arrow-debreu settings
 - could simplify the prox operators enough to not need an EXP solver
 
+# Mon Sep 15 03:07:03 2014
+- look at [multiplier to residual mapping notes](http://stanford.edu/class/ee364b/lectures/monotone_slides.pdf)
+- can we use the same technique to show that the demand function is monotone?
