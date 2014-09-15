@@ -22,11 +22,11 @@ we solve Fisher and Arrow-Debreu models using the formulations given in \todo{ci
 
 An Arrow-Debreu market has $m$ agents and $n$ goods where
 agent $i$ has an initial amount $b_{ij} \in \reals_+$ of good $j$.
-Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \mathbf{R}^m_{+}$.
+Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \reals^m_{+}$.
 That is, he is allocated amount $x_{ij}$ of good $j$.
 Generally, $u_i$ is a concave, increasing function.
 
-Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial goods and buy a bundle of goods $x_i$ to maximize his utility.
+Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial bundle of goods, $b_i \in \reals^n_+ $, and buy a bundle of goods $x_i$ to maximize his utility.
 That is, agent $i$ solves the optimization problem
 \[
 \begin{array}{ll}
@@ -175,12 +175,12 @@ Experimental results comparing various algorithms can be found in Codenotti et a
 
 \subsection{Fisher}
 
-The Fisher equilibrium problem is solved by the following convex program when the utility functions are concave and homogeneous of degree 1.
+The Fisher equilibrium problem is solved by the following convex program when the utility functions are concave and homogeneous of degree 1 \cite{eisenberg1959consensus, gale1960theory, eisenberg1961aggregation}.
 See \cite[Section~6.2]{nisan2007algorithmic} for the optimality conditions and proof:
 
 \[
 \begin{array}{ll}
-\mbox{maximize} & \sum_{i=1}^m \log u_i(x_i) \\
+\mbox{maximize} & \sum_{i=1}^m w_i \log u_i(x_i) \\
 \mbox{subject to} & \sum_{i=1}^m x_{ij} \leq b_j, \quad \forall j\\
 & x \geq 0.
 \end{array}
@@ -246,20 +246,21 @@ May not be convex when $\rho < -1$.
 
 \subsection{Nested CES}
 see \cite{shoven1992applying} for examples and applications.  \todo{when is CES convex? nested is convex?}
+
 \subsection{Cobb-Douglas}
 \[
-u_i(x) = \prod_{j=1}^{n} x_j^{a_j},
+u(x) = \prod_{j=1}^{n} x_j^{a_j},
 \]
 where $\sum_j a_j = 1$.
 
 \subsection{Leontief}
 \[
-u_i(x) = \min_j a_j x_j
+u(x) = \min_j a_j x_j
 \]
 
 \subsection{Piecewise linear concave functions}
 \[
-\min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0
+u(x) = \min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0
 \]
 \subsection{Fractional power}
  \[
@@ -276,8 +277,8 @@ where $a_j, b_j \geq 0$.  Note that these need not be homothetic.
 
 \subsection{Other examples}
 \begin{itemize}
-\item 'VES' functions  $u_i(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
-\item $\min(x_1,x_2) + \min(x_3,x_4)$
+\item 'VES' functions  $u(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
+\item $u(x) = \min(x_1,x_2) + \min(x_3,x_4)$
 \end{itemize}
 
 
