@@ -131,7 +131,11 @@ the value of the aggregate excess demand is zero
 
 ## mccune thesis
 - check out smale's work on newton methods for the problem... woah, its from 1976
-- 
+
+# Sun Sep 14 22:30:25 2014
+- in the exchange model, if we use the welfare setting and are trying to find the unknown weights, but agents have homogeneous utility functions, is it the case that the weights end up being exactly how much money they get from selling their initial endowment, just like in the fisher convex program?
+- can we alternate between prices and weights to get a nice algorithm?
+- is the set of weights convex?
 
 # viz
 - http://www.madhavajay.com/kalki/

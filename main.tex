@@ -85,14 +85,17 @@ two different transformations for this
 so each agent has a constant proportion between goods, but some agents have more total goods than others. 
 \end{itemize}
 
-\section{Existence of equilibria}
-\todo[inline]{Split into Arrow-Debreu and Fisher markets to make it clear which market these results are referring to}
+\section{Problem History}
+\subsection{Formation and proof of existence}
+Walras formulated his original market model in ``Elements of Pure Economics'' \cite{walras1896elements}. While he did not rigorously prove that equilibrium prices must exist, he did propose the first algorithm for computing the prices through his \emph{tatonnement} price updating scheme.
 
-As the Fisher problem is a special case of Arrow-Debreu, all existence and computational results carry over.
+Arrow and Debreu \cite{arrow1954existence} were the first to show that equilibrium prices exist in a setting with concave utilities. The proof relies on a fixed point theorem and is thus non-constructive. As a result, it offers no obvious avenues for actually computing the equilibrium.
 
-Arrow and Debreu \cite{arrow1954existence} showed that an Arrow-Debreu equilibrium exists in the case of concave utilities. 
-However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
+Arrow, Block and Hurwicz \cite{arrow1958stability} showed that for markets satisfying weak gross substitutability, a continuous-time tatonnement process would always converge to equilibrium prices.
 
+\todo{would be nice to give the reader an idea at this point of what is tractable and what isn't. np-hard, disconnected solution sets...}
+
+\subsection{Fisher case}
 For the case of Fisher markets,
 Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and
 Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1.
@@ -101,7 +104,51 @@ Examples of these utilities were introduced by Friedman
 \cite{friedman1973concavity}.
 \todo{rephrase}However, it is unclear if the transformation given in \cite{jain2005market} is of practical use in a convex optimization setting.
 
-In the Arrow-Debreu setting, Arrow, Block, and Hurwicz \cite{arrow1958stability} show that, for a large class of utility functions satisfying the gross substitability property, a cutting plane can be obtained for the optimal prices.
+It is important to note that the Fisher model is a special case of the Arrow-Debreu model. However, the Fisher case is strictly easier than the Arrow-Debreu case. For example, Codenotti et al.\ \cite{codenotti2006leontief} show that the Arrow-Debreu problem with Leontief utilities is NP-hard, while the Fisher problem with Leontief utilities remains a convex program.
+
+\subsection{initial algorithms}
+
+Scarf and others \cite{scarf2008applied,eaves1972homotopies,kuhn1968simplicial}
+expanded on the fixed-point existence theorems to produce algorithms for computing equilibria based on traversing a decomposed price simplex. However, these algorithms have exponential running time in the worst case.
+
+Smale \cite{smale1976convergent, smale1976exchange} developed Newton-based methods which are guaranteed to converge, but with no running time guarantee.
+
+The convergent continuous-time tatonnement process of Arrow, Block and Hurwicz \cite{arrow1958stability} was extended to a discrete-time (and thus computationally implementable) version by Codenotti, McCune and Varadarajan \cite{codenotti2005marketExcess}, who were able to show that it converges for WGS markets in polynomial time.
+
+Negishi \cite{negishi1960welfare} shows that the exchange model equilibrium is given by a convex program whose objective is a linear combination of the utility functions, but with unknown weights. Thus, the computational task is to find these positive weights. A process similar to tatonnement can be performed in the space of weights and is shown by Mantel \cite{mantel1971welfare} to be convergent under certain conditions.
+
+\subsection{Cutting plane methods}
+While working on tatonnement, Arrow, Block and Hurwicz \cite{arrow1958stability} proved a separating hyperplane lemma which would form the basis of much future work. The lemma showed that for any given (non-equilibrium) prices, a function called the aggregate excess demand provided a cutting plane in the price simplex, identifying which half-space contained the equilibrium prices.
+
+An immediate corollary of this result is that for markets with the GS property, the set of equilibrium prices is convex. \todo{specifically, positive homogeneous, GS, and Walras' law} \todo{later generalized to weak GS}
+However, even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}.
+
+This line of worked was continued by Polterovich, Spivak, Primak, Newman, and Nenakov \cite{nenakov1983algorithm,newman1992complexity,primak1984algorithm,primak1993converging}.
+
+Later, a polynomial time algorithm was given by Codenotti, Pemmaraju and Varadarajan \cite{codenotti2005polynomial}. This result held for markets whose aggregate excess demand function statisfied weak gross subsitutability. It combined the cutting plane result with an ellipsoid method to produce a polynomial time algorithm. This is one of the most general settings for the exchange problem and includes many utility functions. This result was later extended by McCune \cite{mccune2007extending} to markets with multi-valued aggregate excess demand functions, which includes linear utility functions.
+
+\subsection{Convex formulations}
+The computational thread that we will follow in this paper started when Jain \cite{jain2007polynomial} rediscovered a convex formulation originally stated by Nenakov and Primak \cite{nenakov1983algorithm}. This formulation was later extended by Chen, Ye and Zhang \cite{chen2007note,chen2010equilibrium} to include some non-homogeneous utility functions. \todo{how does this fit into the WGS framework?}
+
+\subsection{Other approaches}
+Codenotti et al.\ \cite{codenotti2005market,codenotti2005marketCES} form a convex program for exchange economies with CES utility functions that do not satisfy WGS.
+
+\subsection{Models with production}
+Arrow-Debreu models which include the production of goods are studied in \cite{garg2014computability,jain2005market}. \todo{there are many other papers to include}
+
+\subsection{References}
+Good surveys of the literature can be found in Chapters 5 and 6 of \cite{nisan2007algorithmic} and McCune's 2009 thesis \cite{mccune2009algorithmic}.
+
+The market equilibrium problem, including existence proofs, formulations of central concepts such as demand functions, Walras' Law, and the cutting plane property, is also covered in many popular economics texts, such as \cite{varian1992microeconomic, mas1995microeconomic, luenberger1995microeconomic, kreps1990course}.
+
+Experimental results comparing various algorithms can be found in Codenotti et al.\ \cite{codenotti2008experimental}. They compare discrete versions of tatonnement and welfare adjustment, as well as convex formulations for some specific markets.
+
+
+\section{Existence of equilibria}
+
+As the Fisher problem is a special case of Arrow-Debreu, all existence and computational results carry over.
+
+In the Arrow-Debreu setting, Arrow, Block and Hurwicz \cite{arrow1958stability} show that, for a large class of utility functions satisfying the gross substitability property, a cutting plane can be obtained for the optimal prices.
 Also, \cite[p.~608]{mas1995microeconomic} shows that WGS and WARP Arrow-Debreu markets have convex equilibria.
 An immediate corellary of this result is that for markets with the GS property, the set of equilibrium prices is convex.
 This suggests that convex optimization may be useful to approach these problems.
@@ -113,30 +160,15 @@ The formulations for the Arrow-Debreu problem given in \cite{jain2007polynomial,
 Indeed, even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}.
 It is shown in \cite{codenotti2006leontief} that the Arrow-Debreu problem with Leontief utilities is NP-hard.
 
-A good overview is found in \cite{mccune2009algorithmic}. The most modern reference to the cutting plane algorithm is \cite{mccune2007extending}.
-Negishi \cite{negishi1960welfare} shows that the exchange model equilibrium is given by a convex program whose objective is a linear combination of the utility functions, but with unknown weights.
-
 \subsection{Other market results}
 
 Codenotti et all \cite{codenotti2005market, codenotti2005marketCES} write down a different convex program which covers a wider range of CES functions ($-1 \leq \rho < 0$) for Arrow-Debreu markets.
 
 Many authors have considered models with production. See \cite{garg2014computability} for recent results. Other sources are \cite{jain2005market} and \cite{codenotti2005marketExcess}. \todo[inline]{The latter of which also covers excess demand functions.}
 
-\subsection{Interesting theoretical results}
-\begin{itemize}
-\item arrow-debreu is given by welfare system with unknown weights
-\end{itemize}
-
 
 \section{Convex formulation, equilibrium, and optimality conditions}
-The convex minimization formulation for Fisher markets is given by \cite{eisenberg1961aggregation}.
 
-The convex feasibility formulation for Fisher and Arrow-Debreu markets is given in \cite{chen2007note,chen2010equilibrium}.
-
-\todo[inline]{what were the computational approaches for Arrow-Debreu before
-\cite{chen2007note,chen2010equilibrium}?}
-
-Jain \cite{jain2007polynomial} showed the Arrow-Debreu market as a convex problem.
 
 \subsection{Fisher}
 
