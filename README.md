@@ -145,3 +145,22 @@ the value of the aggregate excess demand is zero
 # Mon Sep 15 03:07:03 2014
 - look at [multiplier to residual mapping notes](http://stanford.edu/class/ee364b/lectures/monotone_slides.pdf)
 - can we use the same technique to show that the demand function is monotone?
+
+# Mon Sep 15 22:12:04 2014
+- what are the conditions for arrow-debreu 1954. only quasi-concave!?, and nonsatiatable? is the last really necessary?
+- eisenberg and gale's fisher result only depends on concavity and homogeneity.
+- the homogeneity comes from the fact that we don't want to punish a buyer if he splits into 2 buyers with half the money. is there a way to generalize that?
+- show CES computability line from lecture 15 and make sure you're citing the papers
+- look into last slides of lect 15 for WARP
+
+# Mon Sep 15 23:34:00 2014
+## monotone papers
+# Mon Sep 15 23:31:33 2014
+- the monotone folder in the papers directory has the relevant papers
+- also look at Equilibrium Theory and Applications. it has a chapter by Mas-Colell
+- green library has it: HB145 .I59 1989
+
+# Tue Sep 16 15:34:24 2014
+## looking at a whole bunch of books from green
+- numerical methods in economics by judd mentions the arrow-debreu problem, but doesn't really solve it. 
+- Equilibrium Theory and Applications has a chapter by Mas-Colell. green library has it: HB145 .I59 1989. goes over monotone operators.

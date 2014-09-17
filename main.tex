@@ -1,6 +1,8 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{todonotes}
+\usepackage{amssymb,amsmath}
+
 
 \input defs.tex
 
@@ -16,6 +18,9 @@
 
 \section{Introduction}
 we solve Fisher and Arrow-Debreu models using the formulations given in \todo{citations}. We use splitting and exploit sparsity to solve huge instances of these problems.
+
+\subsection{Applications}
+Some applications are given in Shoven and Whalley \cite{shoven1992applying}.
 
 \section{Market definitions}
 \subsection{Arrow-Debreu}
@@ -87,6 +92,8 @@ so each agent has a constant proportion between goods, but some agents have more
 
 \section{Definitions}
 We'll list some intial definitions here which will be used throughout the remainder of the paper.
+For a review of convexity and convex optimization, see
+\cite{boyd2009convex}.
 
 A utility function $u: \reals^n_+ \to \reals_+$ is \emph{homothetic} if for any $\alpha > 0$ we have that $u(x) \geq u(y)$ if and only if
 $u(\alpha x) \geq u(\alpha y)$.
@@ -128,7 +135,7 @@ It is important to note that the Fisher model is a special case of the Arrow-Deb
 \subsection{Initial algorithms}
 
 Scarf and others \cite{scarf2008applied,eaves1972homotopies,kuhn1968simplicial}
-expanded on the fixed-point existence theorems to produce algorithms for computing equilibria based on traversing a decomposed price simplex. However, these algorithms have exponential running time in the worst case.
+expanded on the fixed-point existence theorems to produce algorithms for computing equilibria based on traversing a decomposed price simplex. However, these algorithms have exponential running time in the worst case. Scarf's algorithm is also described in the text \cite{shoven1992applying}.
 
 Smale \cite{smale1976convergent, smale1976exchange} developed Newton-based methods which are guaranteed to converge, but with no running time guarantee.
 
@@ -170,7 +177,7 @@ The market equilibrium problem, including existence proofs, formulations of cent
 Experimental results comparing various algorithms can be found in Codenotti et al.\ \cite{codenotti2008experimental}. They compare discrete versions of tatonnement and welfare adjustment, as well as convex formulations for some specific markets.
 
 
-\section{Convex formulation, equilibrium, and optimality conditions}
+\section{Convex optimization formulations}
 
 
 \subsection{Fisher}
@@ -228,6 +235,18 @@ Throughout the remainder, we'll use the following formulation:
 Note that the first constraint need only be explicitly formed when $\nabla_j u_i(x_i) > 0$, and we only need to include terms in the sum in
 $\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used later when we exploit sparsity to solve these problems efficiently.
 
+\paragraph{Convexity}
+We see that the convexity of this formulation depends on the agents' utility functions. The formulation is convex if
+\begin{itemize}
+\item $\log(\nabla u_i(x_i)^T x_i)$ is concave, and
+\item $\log(\nabla_j u_i(x_i))$ is convex.
+\end{itemize}
+Note that, for homogeneous functions, Euler's identity gives that
+\[
+\nabla u_i(x_i)^T x_i = u_i(x_i).
+\]
+\todo[inline]{Some special care needs to be taken here for nonsmooth functions.}
+
 \section{Utility functions}
 For each utility function, we'll list if it works in the Fisher setting, the convex formulation given by \cite{chen2010equilibrium}, or the cutting plane setting. List if homogeneous, GS or weak GS, and if demand is a function or a relation. if it satisfies walras' law, etc. Also, show how functions are representable in a DCP system.
 
@@ -235,14 +254,52 @@ For each utility function, we'll list if it works in the Fisher setting, the con
 \[
 u(x) = a^T x
 \]
+\paragraph{Fisher}
+This utility works in the Fisher setting, as it is homogeneous of degree 1.
+\paragraph{Arrow-Debreu}
+This utility works in the Arrow-Debreu setting since
+\[
+\log(\nabla u(x)^T x) = \log(a^T x)
+\]
+is concave and
+\[
+\log(\nabla_j u(x)) = \log(a_j)
+\]
+is constant, therefore convex.
+
+\paragraph{Cutting plane}
+\todo[inline]{satisfies WGS, is multi-valued, WARP}
 
 \subsection{Constant elasticity of substitution (CES)}
 CES constant elasticity of substitution have form
 \[
 u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho},
 \]
-where $-\infty < \rho < 1, \rho \neq 0$.
-May not be convex when $\rho < -1$.
+where $-\infty < \rho \leq 1, \rho \neq 0$.
+CES functions are concave for any of these values of $\rho$.
+May not be tractable when $\rho < -1$.
+\todo{note special cases: linear, cobbdouglas, leonteif}
+
+\paragraph{Fisher}
+This utility works in the Fisher setting, as it is concave and homogeneous of degree 1.
+
+\paragraph{Arrow-Debreu}
+This function does not work in the Arrow-Debreu setting because, since it is homogeneous,
+\[
+\log(\nabla u(x)^T x) = \log(u(x))
+\]
+is concave.
+Also,
+\begin{align*}
+\log(\nabla_j u(x)) & = 
+\log\left( \left(\sum_{j=1}^n a_j x_j^\rho \right)^{\frac{1}{\rho}-1} a_j x_j^{\rho-1}\right)\\
+& = \left(\frac{1}{\rho}-1\right)\log\left( \sum_{j=1}^n a_j x_j^\rho \right) + \log a_j +  \log \left(x_j^{\rho-1}\right),
+\end{align*}
+which is concave, but not convex, as we'd need it to be.
+
+The expression above becomes convex when we move both logs to the same side and cancel terms. \todo[inline]{update}
+
+\paragraph{Cutting plane} I think it is GS
 
 \subsection{Nested CES}
 see \cite{shoven1992applying} for examples and applications.  \todo{when is CES convex? nested is convex?}
