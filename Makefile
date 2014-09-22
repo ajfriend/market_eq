@@ -1,4 +1,4 @@
-TARGETS = main.pdf
+TARGETS = main.pdf note.pdf
 
 all: $(TARGETS)
 
@@ -11,10 +11,13 @@ all: $(TARGETS)
 
 main.pdf: bibliography.bib
 
-.PHONY: clean view purge
+note: note.pdf bibliography.bib
+	open note.pdf
+
+.PHONY: clean view purge note
 
 clean:
-	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi
+	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi *.tdo
 
 purge: clean
 	-@rm -rf $(TARGETS)

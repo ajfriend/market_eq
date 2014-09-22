@@ -164,3 +164,38 @@ the value of the aggregate excess demand is zero
 ## looking at a whole bunch of books from green
 - numerical methods in economics by judd mentions the arrow-debreu problem, but doesn't really solve it. 
 - Equilibrium Theory and Applications has a chapter by Mas-Colell. green library has it: HB145 .I59 1989. goes over monotone operators.
+
+# Wed Sep 17 01:48:57 2014
+- most of the utility functions are covered by the two cases given by Ye. it just requires a monotone transformation
+- ye gives two papers to reference that leonteif utilities are np hard for exchange
+- what about sums of utilities?
+- are the only poly time algos for -1 < rho < 0 from Codenotti?
+
+# Thu Sep 18 15:30:06 2014
+- optimality conditions for a single guy in arrow-debreu
+- ye's derivation of the global system
+
+# introduction
+# prioor work
+# solution via exponential cone solver
+# 
+
+convex/concave. find a saddle point in x,p
+augmented lagrangian in u
+
+max u(x) + lambda p^t x + 1/2 || p - z ||^2
+
+something like the above might give you what you want to comptue the resolvent.
+
+papers dir for prox stuff. something about convex/concave proxes and
+finding saddle points.
+
+write the abstract first. exploiting sparsity. splitting.
+
+# Sat Sep 20 17:25:30 2014
+- substitute out x, since you have the resolvent constraint involving p and q and w.
+- get a non-convex constraint, but we might be able to work around it
+- is it justified to just constrain p to be in the simplex? that keeps it from making p too small
+- what about stephens augmented lagrangian method?
+- look at the monotone notes for when a differentiable map is monotone
+- look at this saddle point characterization in the notes

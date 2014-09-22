@@ -1,0 +1,129 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{todonotes}
+\usepackage{amssymb,amsmath}
+
+
+\input defs.tex
+
+\title{notes on duality}
+\author{AJ Friend}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Convex conjugate}
+Consult \cite{boyd2009convex} for background on duality.
+The definition of the conjugate function is
+\[
+f^*(y) = \sup_{x \in \dom f} \left( y^T x - f(x) \right).
+\]
+
+\paragraph{Alternative representation}
+Note that if we see the conjugate as the optimal value of an optimization
+problem, then we get the equivalence
+\[
+y = \nabla f(x) \iff f^*(y) = y^T x - f(x) = \nabla f(x)^T x - f(x).
+\]
+This equivalence provides a duality.
+We can
+\begin{itemize}
+\item generate (uncontrolled) points of the $f^*$ by plugging (controlled) $x$
+values into $\nabla f$, and
+\item determine $f^*(y)$ by solving the gradient equation $y = \nabla f(x)$.
+\end{itemize}
+\todo[inline]{If $f^{**} = f$, then we can go both ways.}
+
+\paragraph{Fenchel’s inequality} The inequality follows from the definition:
+\[
+f(x) + f^*(y) \geq x^T y
+\]
+Note that equality occurs when $y = \nabla f(x)$.
+
+\section{Duality}
+A primal problem has the form
+\[
+\begin{array}{ll}
+\mbox{minimize} & f(x)\\
+\mbox{subject to} & Ax = b\\
+& x \geq 0.
+\end{array}
+\]
+
+The dual problem has the form
+\[
+\begin{array}{ll}
+\mbox{maximize} & -f^*(\tau - A^T \lambda) - b^T \lambda \\
+\mbox{subject to} & \tau \geq 0
+\end{array}
+\]
+
+\paragraph{Optimality conditions}
+The optimality conditions are given by
+\begin{align*}
+A x &= b \\
+x &\geq 0 \\
+\tau &\geq 0 \\
+f(x) + f^*(\tau - A^T \lambda) + b^T \lambda &= 0,
+\end{align*}
+where the first three conditions are primal and dual feasibility,
+and the last condition is zero duality gap.
+Implicitly, we are assuming the same constraints on the domains of $f$ and $f^*$.
+
+\paragraph{Equivalence with KKT conditions}
+The optimality conditions given above are equivalent to the standard KKT
+conditions. To see this, note that since, via the above constraints,
+$\tau - A^T \lambda \in \dom f^*$, so there is some $x$ such that
+
+\begin{align*}
+\nabla f(x) &= \tau - A^T \lambda \\
+f^*(\tau - A^T \lambda) &= \left( \tau - A^T \lambda \right)^T x - f(x).
+\end{align*}
+
+Adding the first condition and substituting the second into the optimality
+conditions above gives us the usual KKT conditions:
+
+\begin{align*}
+A x &= b \\
+x &\geq 0 \\
+\tau &\geq 0 \\
+\tau - A^T \lambda &= \nabla f(x)\\
+\tau^T x &= 0.
+\end{align*}
+
+\todo[inline]{Now, we'll show the other direction of the equivalence.}
+\todo[inline]{For LP, different forms gives complementarity and zero duality
+gap versions of KKT.}
+\todo[inline]{The duality of complementarity and duality gap must be baked into
+the duality derivation.}
+\paragraph{Example}
+For the function $f(x) = c^T x$, we have the conjugate
+$f^*(y) = 0$ if $y=c$ and $f^*(y) = +\infty$ otherwise.
+This allows us to recover the usual LP KKT conditions:
+\begin{align*}
+A x &= b \\
+x &\geq 0 \\
+\tau &\geq 0 \\
+c^T x + b^T \lambda &= 0\\
+\tau - A^T \lambda &= c.
+\end{align*}
+Note that the fourth condition, that the duality gap is zero, can be
+re-written as a complementarity condition, since
+
+\begin{align*}
+& c^T x + b^T \lambda = 0 \\
+\implies& (\tau - A^T \lambda)^T x + b^T \lambda = 0 \\
+\implies& \tau^Tx - \lambda^T A x + b^T \lambda = 0 \\
+\implies& \tau^Tx - \lambda^T b + b^T \lambda = 0 \\
+\implies& \tau^Tx  = 0.
+\end{align*}
+
+
+\newpage
+\bibliographystyle{alpha}
+\bibliography{bibliography.bib}
+
+
+\end{document}
