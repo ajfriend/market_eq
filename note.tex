@@ -66,11 +66,28 @@ The optimality conditions are given by
 A x &= b \\
 x &\geq 0 \\
 \tau &\geq 0 \\
-f(x) + f^*(\tau - A^T \lambda) + b^T \lambda &= 0,
+f(x) + f^*(\tau - A^T \lambda) + b^T \lambda &\leq 0,
 \end{align*}
 where the first three conditions are primal and dual feasibility,
-and the last condition is zero duality gap.
-Implicitly, we are assuming the same constraints on the domains of $f$ and $f^*$.
+and the last condition is an upper bound on the duality gap.
+(Since the duality gap is always nonnegative for a feasible pair,
+this last condition implies zero duality gap.)
+Implicitly, we assume the same constraints as on the domains of $f$ and $f^*$.
+
+\paragraph{Zero duality gap}
+To see the zero duality gap condition algebraically, recall Fenchel's inequality.
+We have that
+\[
+f(x) + f^*(\tau - A^T \lambda) + b^T\lambda \geq x^T (\tau - A^T \lambda) + b^T\lambda
+= x^T \tau \geq 0,
+\]
+which implies equality, and, in particular, the complementarity condition
+$x^T \tau = 0$.
+The equality triggers the equality condition in the Fenchel inequality, which
+means that $\tau - A^T \lambda = \nabla f(x)$.
+These two conditions give us
+exactly the KKT conditions for the problem.
+The next section shows this result in another (but essentially the same) way.
 
 \paragraph{Equivalence with KKT conditions}
 The optimality conditions given above are equivalent to the standard KKT
@@ -98,6 +115,12 @@ x &\geq 0 \\
 gap versions of KKT.}
 \todo[inline]{The duality of complementarity and duality gap must be baked into
 the duality derivation.}
+\todo[inline]{Can I make the first version into a convex program by using the
+Fenchel inequality to show that the last sum is bounded below by zero?
+Of course I can! If not fenchel, then certainly because we are bounding the
+the duality gap, so we only want it less than zero!}
+\todo[inline]{Can I use this to write Ye's optimality conditions without
+gradients of functions?}
 \paragraph{Example}
 For the function $f(x) = c^T x$, we have the conjugate
 $f^*(y) = 0$ if $y=c$ and $f^*(y) = +\infty$ otherwise.

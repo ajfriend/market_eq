@@ -199,3 +199,6 @@ write the abstract first. exploiting sparsity. splitting.
 - what about stephens augmented lagrangian method?
 - look at the monotone notes for when a differentiable map is monotone
 - look at this saddle point characterization in the notes
+
+# Mon Sep 22 01:58:15 2014
+- switch to biblatex?
