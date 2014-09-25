@@ -202,3 +202,31 @@ write the abstract first. exploiting sparsity. splitting.
 
 # Mon Sep 22 01:58:15 2014
 - switch to biblatex?
+
+# Tue Sep 23 22:48:27 2014
+- i'm comfortable with the fisher equilibrium conditions and transformations, and the proof (at least in the linear case) that the aggregate program gives the equilibrium
+- general fisher case?
+- aggregate requires homogeneous utilities?
+- i can see the transformation which is made to remove the non-convex constraint. how does that generalize for arrow-debreu?
+- can i do a conjugate form of arrow-debreu and fisher?
+
+# Wed Sep 24 00:05:15 2014
+- why do the fisher opt conditions require the extra constraint?
+- can i not just do the arrow-debreu setting once, and fisher is a speical case?
+- we'll have to see if the conjugate actually helps, since the dual gap constraint usually just goes into removing a dual variable.
+
+# Thu Sep 25 01:14:13 2014
+## object oriented design
+- list for utility interests (ordered)
+- dictionary for initial endowment (ordered?)
+- each of these should have keys for goods. keys can be anything in python
+- function for mapping between good dictionary and contiguous array for utility function
+- interface for utility function includes evaluation, log u^T x, log u
+- utility function interface plugs into a common prox function code
+- emits dict of prox result
+- aggregator does average and sends it back out
+- the individual proxes can limit the number of constraints based on their expectation of what will be active
+- maybe we can even do multiple iterations until we get it right
+- or maybe we get it wrong initially, and let ADMM sort it out in the limit
+- should do this in a general way, to allow for both GS cutting plane method and Fisher version.
+- the object should be able to take in a dict which contains *everything*, but it won't read it all. it just requires that the dict has at least what it is specifying.

@@ -143,6 +143,153 @@ re-written as a complementarity condition, since
 \implies& \tau^Tx  = 0.
 \end{align*}
 
+\section{Fisher opt conditions}
+The primal Fisher problem has the form
+\[
+\begin{array}{ll}
+\mbox{minimize} & - u_i(x_i)\\
+\mbox{subject to} & p^T x_i \leq w_i\\
+& x_i \geq 0.
+\end{array}
+\]
+
+The dual Fisher problem has the form
+\[
+\begin{array}{ll}
+\mbox{maximize} & -(-u_i)^*(\tau - p y_i) - w_i y_i\\
+\mbox{subject to} & \tau_i \geq 0\\
+& y_i \geq 0.
+\end{array}
+\]
+\todo[inline]{write down KKT conditions. check with example of linear utility}
+
+\section{Arrow-Debreu conditions}
+The primal Arrow-Debreu problem has the form
+\[
+\begin{array}{ll}
+\mbox{minimize} & - u_i(x_i)\\
+\mbox{subject to} & p^T x_i \leq p^T b_i\\
+& x_i \geq 0.
+\end{array}
+\]
+
+The dual problem has the form
+\[
+\begin{array}{ll}
+\mbox{maximize} & -(- u_i)^*(\tau_i - p y_i) - p^T b_i y_i\\
+\mbox{subject to} & y_i \geq 0\\
+& \tau_i \geq 0.
+\end{array}
+\]
+
+We can also write down the optimality conditions for the equilibrium allocation,
+which includes a global resource constraint.
+
+\begin{align*}
+-\nabla u_i(x_i) + p y_i &= \tau_i\\
+y_i p^T x_i &= y_i p^T b_i \\
+\tau_i^T x_i &= 0\\
+p^T x_i &\leq p^T b_i\\
+x_i, y_i, \tau_i &\geq 0\\
+\sum_{i} x_{ij} &\leq \sum_{i} b_{ij}
+\end{align*}
+
+First, we'll simplify the constraints by removing $\tau$:
+
+\begin{align*}
+p y_i &\geq \nabla u_i(x_i) \\
+y_i p^T x_i &= y_i p^T b_i \\
+y_i p^T x_i &= \nabla u_i(x_i)^T x_i\\
+p^T x_i &\leq p^T b_i\\
+x_i, y_i &\geq 0\\
+\sum_{i} x_{ij} &\leq \sum_{i} b_{ij}
+\end{align*}
+
+Next, we remove the $y$ variables by combining the second and third constraint
+to get that
+\[
+y_i = \frac{\nabla u_i(x_i)^T x_i}{p^T b_i},
+\]
+and plug it into the first constraint to get the new set of constraints:
+\begin{align*}
+\frac{\nabla u_i(x_i)^T x_i}{p^T b_i} p &\geq \nabla u_i(x_i) \\
+p^T x_i &\leq p^T b_i\\
+x_i, y_i &\geq 0\\
+\sum_{i} x_{ij} &\leq \sum_{i} b_{ij}.
+\end{align*}
+
+We'll drop the second constraint, as it is implied by the others:
+\begin{align*}
+\nabla u_i(x_i)^T x_i p_j &\geq \nabla_j u_i(x_i) p^T b_i\quad \forall i,j \\
+\sum_{i} x_{ij} &\leq \sum_{i} b_{ij}\quad \forall i\\
+p, x_i &\geq 0\quad \forall i.
+\end{align*}
+
+\paragraph{Equivalence with original constraints}
+To see the equivalence with the original constraints, take the first inequality,
+multiply by $x_{ij}$ and sum over $j$ to get
+\begin{align*}
+\sum_j \nabla u_i(x_i)^T x_i p_j x_{ij} &\geq \sum_j \nabla_j u_i(x_i) x_{ij} p^T b_i \\
+\implies \nabla u_i(x_i)^T x_i p^T x_i &\geq \nabla u_i(x_i)^T x_i p^T b_i \\
+\implies p^T x_i &\geq p^T b_i.
+\end{align*}
+
+Note that the last constraint implies that
+\[
+p_j \sum_i x_{ij} \leq p_j \sum_i b_{ij}.
+\]
+
+Now, we have that
+
+\begin{align*}
+\sum_i p^T b_i &\leq \sum_i p^T x_i\quad \text{(by something)}\\
+&= \sum_j p_j \sum_i x_{ij} \\
+&\leq \sum_j p_j \sum_i b_{ij}\quad \text{(by something)}\\
+&= \sum_i p^T b_i.
+\end{align*}
+
+This implies equality holds throughout, so, in particular,
+\begin{align*}
+p^T x_i &= p^T b_i\\
+\sum_i x_{ij} &= \sum_i b_{ij}
+\end{align*}
+
+This recovers all the original constraints.
+
+\section{Arrow-Debreu conditions with conjugate functions}
+The dual of an agent's maximization problem in the Arrow-Debreu setting
+is given above, but involves a conjugate function.
+We see that the full KKT conditions for equilibrium are given by
+primal and dual feasibility and zero duality gap:
+
+\begin{align*}
+-u_i(x_i) + (-u_i)^*(\tau_i - p y_i) + p^T b_i y_i &\leq 0\\
+p^T x_i &\leq p^T b_i \\
+\sum_i x_{ij} &\leq \sum_i b_{ij}\\
+p, x_i, y_i, \tau_i &\geq 0.
+\end{align*}
+Of course, we can also obtain the usual form for the KKT conditions.
+Note that Fenchel's inequality implies
+\[
+-u_i(x_i) + (-u_i)^*(\tau_i - p y_i) + p^T b_i y_i
+\geq x_i^T \tau_i - x_i^T p y_i + p^T b_i y_i,
+\]
+which implies that
+\begin{align*}
+x_i^T \tau_i &= 0\\
+x_i^T p y_i &= p^T b_i y_i,
+\end{align*}
+which are the KKT complementarity conditions.
+The gradient condition follows from the equality case of the Fenchel inequality,
+which gives that
+\[
+\tau_i - p y_i = - \nabla u_i(x_i).
+\]
+This gives us the complete set of KKT conditions.
+
+Unfortunately, the conjugate form of the KKT conditions doesn't seem to lend
+itself to any useful transformations which might help us to attack the problem
+in any way other than Ye's formulation.
 
 \newpage
 \bibliographystyle{alpha}
