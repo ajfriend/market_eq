@@ -370,6 +370,40 @@ handle splitting over agents, and also splitting over constraints. over agents n
 
 inspect dual variables to guarantee some allocations are zero? this allows us to throw them out of the problem as we iterate.
 
+For agent $i$, let  $f_i(x_i, \phi)$ be the indicator function for the constraints
+\[
+\begin{array}{c}
+\log(\nabla u_i(x_i)^T x_i) + \phi_j \geq  \log(\nabla_j u_i(x_i)) +  \log(\sum_k b_{ik} e^{\phi_k}), \forall j\\
+x_{ij} \geq 0.
+\end{array}
+\]
+
+Then the problem we'd like to solve is given by
+
+\[
+\begin{array}{ll}
+\mbox{minimize} & \sum_i f_i(x_i, \phi) \\
+\mbox{subject to} & \sum_i x_{ij} = \sum_i b_{ij}, \forall j.
+\end{array}
+\]
+
+(We can assume equality since we know the constraints are tight at the solution.)
+We can solve this problem with the ADMM framework by doing sharing on the
+allocation variables $x_{ij}$ and consensus on the price variables $\phi$.
+The resulting ADMM algorithm is 
+
+
+\begin{align}
+u^{k+1} &:= \tilde{x}^k + u^k \\
+w_i^{k+1} &:= w_i^k + \phi^k - \bar{\phi}^k\\
+x_i^{k+1}, \phi_i^{k+1} &:= \mbox{prox}_{f_i}(x_i^k - \tilde{x}^k - u^{k+1},
+\bar{\phi}^k - w_i^{k+1}),
+\end{align}
+where $\tilde{x} = \frac{\sum_{i=1}^n x_i - b_i}{n} = \bar{x} - b/n$ and
+$\bar{\phi}$ is the average of the $\phi$ elements.
+
+
+
 \subsection{Cutting plane}
 \subsection{Approximations?}
 can i approximate the exponential cone to do an approximate prox evaluation

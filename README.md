@@ -230,3 +230,21 @@ write the abstract first. exploiting sparsity. splitting.
 - or maybe we get it wrong initially, and let ADMM sort it out in the limit
 - should do this in a general way, to allow for both GS cutting plane method and Fisher version.
 - the object should be able to take in a dict which contains *everything*, but it won't read it all. it just requires that the dict has at least what it is specifying.
+
+# Sun Sep 28 14:30:12 2014
+- make a market object which collects agents
+- fisher and arrow-debreu market types
+- allow it to check that the market is reasonable: each good wanted, each person wants
+- allow the market to compute equilibrium
+- returns a consensus algorithm object? with residual info over the runs of the algo? allow it to warm start, so we can tack on 100 extra iterations, if we want
+- we can apply different algorithms to a market: tatonnment, aggregate re-weighting, cutting plane, admm
+
+# Mon Sep 29 16:54:52 2014
+- 'ULD' property from page 111 in Mas-Colell is exactly *monotonicity*
+
+# Fri Oct  3 17:50:28 2014
+- i just need a key-value averager
+- how do i generalize for multiple variable types? (x, phi)?
+- what about an efficient double dict for row, column sums?
+- is it simpler to have a single proxer for each agent?
+- who takes care of forming the input to the prox? same prox object? data-prep function, or wrap the proxer in another class?
