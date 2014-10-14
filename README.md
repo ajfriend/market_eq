@@ -248,3 +248,35 @@ write the abstract first. exploiting sparsity. splitting.
 - what about an efficient double dict for row, column sums?
 - is it simpler to have a single proxer for each agent?
 - who takes care of forming the input to the prox? same prox object? data-prep function, or wrap the proxer in another class?
+
+# Tue Oct  7 01:55:35 2014
+- for places to publish, look at GAMS and other 'commonly used' packages in microeconomics to see what is being done and how.
+
+# Wed Oct  8 13:47:08 2014
+- walras' law is just that the entire consumer budget is spent.
+- demand function (of prices and consumer wealth) should be homogeneous of degree 0
+- the above two assumptions are very general.
+- GS is a bit restrictive.
+- look at ex 2.f.13 in mas-collel
+- is there a relation between monotone operators and strongly monotone preference relations?
+
+# Wed Oct  8 17:18:06 2014
+- i think GS implies WARP?
+- gs gives a cutting plane. does warp give the same cutting plane?
+- kehoe does some experiments. but the implication seems to be warp => gs... werid
+- why do they say that warp can hold for agents, but possibly not in aggregate?
+- perhaps there is some detail about the price domain not being full. we are restricted to the positive price simplex?
+- i need to look at the example where it does not hold in mas-collel...
+
+# Wed Oct  8 21:30:00 2014
+- chapter 2 and 4 here are good notes <http://business.illinois.edu/nmiller/notes.html>
+
+# Thu Oct  9 12:16:15 2014
+- i think the question is wether this operator is *maximal* monotone. can we extend the prices to all of R^n?
+- can i write a test for the utility funcs to compare the demand function with the optimization code. want both to be feasible allocations and have close utility values.
+
+# Mon Oct 13 21:05:14 2014
+- introduce nicer, cleaner definitions into the first introduction section explaining the markets
+- give demand and excess demand functions
+- in the definitions section, give GS, WARP, and maybe monotone
+- add in proof of optimality of arrow-debreu as appendix.

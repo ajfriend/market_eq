@@ -31,14 +31,16 @@ That is, he is allocated amount $x_{ij}$ of good $j$.
 Generally, $u_i$ is a concave, increasing function.
 
 Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial bundle of goods, $b_i \in \reals^n_+ $, and buy a bundle of goods $x_i$ to maximize his utility.
-That is, agent $i$ solves the optimization problem
-\[
+That is, agent $i$ solves the \emph{utility maximization problem} problem
+
+\begin{equation}
+\label{p-ump}
 \begin{array}{ll}
 \mbox{maximize} & u_i(x_i) \\
 \mbox{subject to} & p^T x_i \leq p^T b_i \\
 & x_i \geq 0.
 \end{array}
-\]
+\end{equation}
 
 The \emph{Arrow-Debreu market equilibrium problem} is to find prices $p$ and an allocation matrix $x \in \reals^{m \times n}$ (where $x_i^T$ is the $i$th row of $x$) such that the following are true:
 \begin{itemize}
@@ -100,13 +102,77 @@ The utility function is \emph{monotone} if $x \geq y$ implies that $u(x) \geq u(
 It is \emph{homogeneous} of degree $d$ if for any $\alpha > 0$,
 $u(\alpha x) = \alpha^d u(x)$.
 
-\begin{itemize}
-\item demand function
-\item aggregate excess demand function
-\item (weak) gross substitutability
-\item WARP?
-\item walras' law
-\end{itemize}
+When it doesn't cause confusion, we will write the \emph{demand relation} (or \emph{demand function}
+when the relation is single-valued) of agent $i$ as $x_i(p)$, defined as the set of solutions to that agent's
+utility maximization problem~(\ref{p-ump}) at given market prices $p$.
+
+The \emph{excess demand function} is $z_i(p) = x_i(p) - b_i$.
+
+Note that the market is in equilibrium if we find prices so that
+\[
+\sum_i z_i(p) \leq 0.
+\]
+
+The \emph{aggregate demand} and \emph{aggregate excess demand} functions are,
+respectively,
+
+\begin{align*}
+X(p) = \sum_i x_i(p)\\
+Z(p) = \sum_i z_i(p).
+\end{align*}
+
+A demand function satisfies \emph{Walras' Law} if
+\[
+p^T x_i(p) = p^T b,
+\]
+or, equivalently, $p^T z_i(p) = 0$.
+
+A demand function satisfies the \emph{weak axiom of revealed preferences}
+(WARP) if, for any two price vectors $p$ and $p'$, we have
+\[
+p^T x_i(p') \leq 0 \implies p'^T x_i(p) \leq 0.
+\]
+\todo{Note that we can interpret this condition in terms of preference cutting planes.}
+
+If we assume Walras' Law, note that WARP is equivalent to the demand function
+being a \emph{monotone operator}. That is, for any two price vectors $p$ and $p'$,
+\[
+\left(x(p) - x(p')\right)^T (p - p') \leq 0.
+\]
+\todo[inline]{Figure out maximality of this operator. How do negative prices work?
+Could we just restrict the UMP to have $p^Tx \geq 0$?}
+
+A demand function satisfies \emph{weak gross substitutability} (WGS)
+if when $p$ and $p'$ are such that for some $i$, $p'_i > p_i$ and
+$p'_k = p_k$ for $k \neq i$, then $x_k(p') \geq x_k(p)$ for $k \neq i$.
+We can interpret this definition as requiring that if a single price increases,
+then the demand for all other goods cannot decrease.
+
+For differentiable demand functions, we could write something like
+\[
+\frac{\partial x_k(p)}{\partial p_i} \geq 0,\quad k \neq i.
+\]
+
+GS is a bit of a restrictive condition. WARP is a more natural condition in some
+sense, as it is simply requiring that agents make consistent choices.
+
+(Reasonable assumptions for the market are Walras' Law and 0-homogeneity.
+Start with local conditions and then apply them to the aggregate functions.
+Note that WARP and GS imply that demand functions supply cutting planes.)
+
+\todo[inline]{def 17.f.2 in mas-collel. Look at page 613 for a connection
+between WGS and WARP. Neither implies the other, but they both give cutting
+planes. right way to phrase: GS has a `revealed preference property', pg. 614.
+look at pg. 605}
+
+existence is given by prop 17.c.2
+pg. 580 gives pure exchange demand functions.
+section 2.f in mas-collel for WARP
+somewhere in mas-collel, he suggests and gives an example where
+WARP is not additive. Weird, because monotone operators are closed under addition.
+Look at the example to figure out what's up.
+example 4.c.1 for failure of agg demand to be WARP
+see note at end of pg 113: see EX 4.c.13 and Section 17.F
 
 
 
@@ -225,7 +291,8 @@ Throughout the remainder, we'll use the following formulation:
 \[
 \begin{array}{ll}
 \mbox{find} & x, \phi \\
-\mbox{subject to} & \log(\nabla u_i(x_i)^T x_i) + \phi_j \geq  \log(\nabla_j u_i(x_i)) +  \log(\sum_k b_{ik} e^{\phi_k}), \forall i,j\\
+\mbox{subject to} & \log(\nabla u_i(x_i)^T x_i) - \log(\nabla_j u_i(x_i)) + \phi_j 
+\geq \log(\sum_k b_{ik} e^{\phi_k}), \forall i,j\\
 & \sum_i x_{ij} \leq \sum_i b_{ij}, \forall j\\
 & x_{ij} \geq 0.
 \end{array}
@@ -236,10 +303,11 @@ $\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used lat
 
 \paragraph{Convexity}
 We see that the convexity of this formulation depends on the agents' utility functions. The formulation is convex if
-\begin{itemize}
-\item $\log(\nabla u_i(x_i)^T x_i)$ is concave, and
-\item $\log(\nabla_j u_i(x_i))$ is convex.
-\end{itemize}
+\[
+\log(\nabla u_i(x_i)^T x_i) - \log(\nabla_j u_i(x_i))
+\]
+is concave.
+
 Note that, for homogeneous functions, Euler's identity gives that
 \[
 \nabla u_i(x_i)^T x_i = u_i(x_i).
@@ -283,20 +351,22 @@ May not be tractable when $\rho < -1$.
 This utility works in the Fisher setting, as it is concave and homogeneous of degree 1.
 
 \paragraph{Arrow-Debreu}
-This function does not work in the Arrow-Debreu setting because, since it is homogeneous,
-\[
-\log(\nabla u(x)^T x) = \log(u(x))
-\]
-is concave.
-Also,
+Some algebra shows that 
 \begin{align*}
-\log(\nabla_j u(x)) & = 
-\log\left( \left(\sum_{j=1}^n a_j x_j^\rho \right)^{\frac{1}{\rho}-1} a_j x_j^{\rho-1}\right)\\
-& = \left(\frac{1}{\rho}-1\right)\log\left( \sum_{j=1}^n a_j x_j^\rho \right) + \log a_j +  \log \left(x_j^{\rho-1}\right),
+\log(\nabla u(x)^T x) - \log(\nabla_j u(x)) =
+\log\left(\sum_{j=1}^n a_j x_j^\rho \right) - \log a_j + (1-\rho) \log x_j,
 \end{align*}
-which is concave, but not convex, as we'd need it to be.
+which is indeed concave when $0 < \rho \leq 1$.
 
-The expression above becomes convex when we move both logs to the same side and cancel terms. \todo[inline]{update}
+\todo[inline]{Codenotti and McCune extend the convex formulation to handle $-1 \leq \rho < 0$.}
+
+\paragraph{Demand}
+We can derive the demand for the CES utility through the KKT conditions of the
+UMP. We get that
+\[
+x_j = p^Tb\frac{p_j^{r-1} a_j^{1-r}}{\sum_k p_k^r a_k^{1-r}},
+\]
+where $r = \rho/(\rho-1)$.
 
 \paragraph{Cutting plane} I think it is GS
 
@@ -308,6 +378,20 @@ see \cite{shoven1992applying} for examples and applications.  \todo{when is CES 
 u(x) = \prod_{j=1}^{n} x_j^{a_j},
 \]
 where $\sum_j a_j = 1$.
+
+We have that
+\begin{align*}
+\log(\nabla u(x)^T x) - \log(\nabla_j u(x)) =
+\log x_j - \log a_j,
+\end{align*}
+which is indeed concave.
+
+\paragraph{Demand}
+From the optimality conditions, we find that the demand is given by
+\[
+x_j = \lambda \frac{a_j}{p_j},
+\]
+where $\lambda = \frac{p^Tb}{\sum a_j}$.
 
 \subsection{Leontief}
 \[
@@ -339,12 +423,13 @@ u(x) = \sum_{j=1}^n a_j \log(x_j+ b_j),
 \]
 where $a_j, b_j \geq 0$.  Note that these need not be homothetic.
 
-\subsection{Other examples}
-\begin{itemize}
-\item 'VES' functions  $u(x) = \sum_{j=1}^{n} a_j x_j^{\rho_j}$ for $0 < \rho_j < 1$
-\item $u(x) = \min(x_1,x_2) + \min(x_3,x_4)$
-\end{itemize}
-
+\paragraph{Demand}
+From the optimality conditions, we find that
+\[
+x_j = \max(0, \tau a_j/p_j - b_j),
+\]
+where $\tau \geq 0$ is some constant such that $\sum_j p_j x_j = p^Tb$. \todo{fix the b variable here.}
+This is basically \emph{water-filling}.
 
 
 
@@ -366,15 +451,41 @@ what work, what are representable
 \subsection{CVXPY and SCS}
 \subsection{Exploiting sparsity}
 \subsection{Splitting}
-handle splitting over agents, and also splitting over constraints. over agents needs no multiplication of variables, splitting over constraints does. find a prox regime that handles both easily.
+%handle splitting over agents, and also splitting over constraints. over agents needs no multiplication of variables, splitting over constraints does. find a prox regime that handles both easily.
 
-inspect dual variables to guarantee some allocations are zero? this allows us to throw them out of the problem as we iterate.
+%inspect dual variables to guarantee some allocations are zero? this allows us to throw them out of the problem as we iterate.
 
-For agent $i$, let  $f_i(x_i, \phi)$ be the indicator function for the constraints
+\todo[inline]{Introduce B and G relation notation. subscript notation.}
+
+We can use an ADMM-based splitting method to solve the market equilibrium problem.
+For full algorithmic generality, we will imagine a setting where each agent 
+is interested in only a small subset of the total avaible kinds of goods, and
+is also initially endowed only with a small subset of the total goods.
+
+We'll switch to a variable notation more suitable for consensus ADMM.
+Let $\mathcal{G}$ be a set indexing all goods any agent could be interested in, 
+either by being involved in the agent's utility function, or because the agent is
+initially endowed with that good.
+Agent $i$'s utility function involves a subset of goods $G_i \subset \mathcal{G}$.
+Let $x_i \in \reals^{|G_i|}$ be agent $i$'s decision variable, where
+$(x_i)_g$ is the amount of good $g \in G_i$ in the agent's bundle.
+The agent is initially endowed with an allocation of goods $b_i \in \reals^{|B_i|}$,
+where $B_i \subset \mathcal{G}$, and $(b_i)_g$ is the amount of good $g$ endowed.
+The agent is also interested in the prices of goods. Let his local prices
+be $\phi_i \in \reals^{|G_i \cup B_i|}$.
+To lighten notation, we'll write $x_{ig}$, $b_{ig}$, and $\phi_{ig}$.
+
+Note that
+\[
+\bigcup_{i=1}^n G_i = \bigcup_{i=1}^n B_i = \mathcal{G}.
+\]
+
+
+For agent $i$, let  $f_i(x_i, \phi_i)$ be the indicator function for the constraints
 \[
 \begin{array}{c}
-\log(\nabla u_i(x_i)^T x_i) + \phi_j \geq  \log(\nabla_j u_i(x_i)) +  \log(\sum_k b_{ik} e^{\phi_k}), \forall j\\
-x_{ij} \geq 0.
+\log(\nabla u_i(x_i)^T x_i) - \log(\nabla_g u_i(x_i)) + \phi_{ig} \geq  \log\left(\sum\limits_{k \in B_i} b_{ik} e^{\phi_{ik}}\right),\quad \forall g \in G_i\\
+x_{ig} \geq 0, \quad \forall g \in G_i.
 \end{array}
 \]
 
@@ -382,25 +493,54 @@ Then the problem we'd like to solve is given by
 
 \[
 \begin{array}{ll}
-\mbox{minimize} & \sum_i f_i(x_i, \phi) \\
-\mbox{subject to} & \sum_i x_{ij} = \sum_i b_{ij}, \forall j.
+\mbox{minimize} & \sum_i f_i(x_i, \phi_i) \\
+\mbox{subject to} & \sum\limits_{i \in G^{-1}_g} x_{ig} = \sum\limits_{i \in B^{-1}_g} b_{ig},\quad \forall g \in \mathcal{G}\\
+& \phi_{ig} = \Phi_g,\quad \forall i \in G^{-1}_g \cup B^{-1}_g.
 \end{array}
 \]
 
-(We can assume equality since we know the constraints are tight at the solution.)
-We can solve this problem with the ADMM framework by doing sharing on the
-allocation variables $x_{ij}$ and consensus on the price variables $\phi$.
+The first set of constraints are the global resource constraints; the amount of
+goods purchased by agents cannot exceede the total initial endowed amount.
+We can assume equality here (instead of an upper bound)
+since constraints are tight at the solution. This equality formulation gives
+a simpler ADMM iteration.
+
+The second set of constraints are consensus constraints on the price variables,
+$\phi_i$. It simply says that all agents with an opinion, $\phi_{ij}$, on the price
+of good $g$ must agree. They agree through a global consensus variable $\Phi$.
+
+Note that we have a generalized consensus problem in the price variables,
+$\phi$, and a generalized sharing problem in the allocation variables, $x$.
+
 The resulting ADMM algorithm is 
-
-
 \begin{align}
-u^{k+1} &:= \tilde{x}^k + u^k \\
-w_i^{k+1} &:= w_i^k + \phi^k - \bar{\phi}^k\\
-x_i^{k+1}, \phi_i^{k+1} &:= \mbox{prox}_{f_i}(x_i^k - \tilde{x}^k - u^{k+1},
-\bar{\phi}^k - w_i^{k+1}),
+\label{a-xtild}
+\tilde{x}^k_g &:= \frac{1}{|G^{-1}_g|} \left( \sum_{i \in G^{-1}_g} x^k_{ig} - \sum_{i \in B^{-1}_g} b_{ig}\right)\\
+\label{a-phibar}
+\bar{\phi}^k_g &:= \frac{1}{ |G^{-1}_g \cup B^{-1}_g| } \sum_{i \in G^{-1}_g \cup B^{-1}_g}\phi^k_{ig}\\
+u^{k+1} &:= u^k + \tilde{x}^k\\
+w_i^{k+1} &:= w_i^k + \phi^k_i - \bar{\phi}^k_{G_i}\\
+\label{a-prox}
+x_i^{k+1}, \phi_i^{k+1} &:= \mbox{prox}_{f_i}(x_i^k - \tilde{x}^k_{G_i} - u^{k+1}_{G_i},
+\bar{\phi}^k_{G_i} - w_i^{k+1}).
 \end{align}
-where $\tilde{x} = \frac{\sum_{i=1}^n x_i - b_i}{n} = \bar{x} - b/n$ and
-$\bar{\phi}$ is the average of the $\phi$ elements.
+
+This algorithm needs to be explained.
+In equation~(\ref{a-xtild}), $\tilde{x}^k_g$ gives a measure of the violation of
+the global resource constraint, normalized by the number of agents participating
+in considering that good.
+In equation~(\ref{a-phibar}), $\bar{\phi}^k_g$ gives the average of the price
+opinions $\phi^k_g$ over all agents with an interest in the price of good $g$.
+Dual variables $u^k$ and $w^k_i$ are updated in the next two equations.
+Note that $\tilde{x}^k_g$, $\bar{\phi}^k_g$, and $u^k$ are \emph{global} variables
+and that $w_i^k$, $x_i^{k+1}$, and $\phi_i^{k+1}$ are \emph{local} variables
+for each agent. In equation~(\ref{a-prox}), each agent compute the projection
+onto his local optimality constraints. Each agent emits their local results and the
+global computation of $\tilde{x}^{k+1}_g$ and $\bar{\phi}^{k+1}_g$ continues in the next
+step.
+
+
+
 
 
 
@@ -413,6 +553,85 @@ what if we approximate everything with a quadratic around the current iterate fo
 
 \section{Huge, distributed models}
 \missingfigure{Add a yet to be made figure here.}
+
+\section{Monotone operators}
+For many utility functions \todo{when?}, the excess demand function (or correspondence,
+or relation) of an agent is a
+monotone operator.
+That is,
+\begin{equation}
+\label{e-monotone}
+\left[z(p) - z(q) \right]^T \left[p - q\right] \leq 0.
+\end{equation}
+
+If we assume that Walras' Law holds, \ie, each agent spends their entire
+budget, or $p^T z(p) = p^T x(p) - p^T b = 0$, then the operator monotonicity has
+a nice economic interpretation in terms of \emph{preferences}.
+
+Expanding inequality~(\ref{e-monotone}) and applying Walras' Law, we find that
+\[
+p^T z(q) + q^T z(p) \geq 0.
+\]
+
+We thus see that the implication
+\begin{equation}
+\label{e-preference}
+p^T z(q) \leq 0 \implies q^T z(p) \geq 0
+\end{equation}
+is equivalent to inequality~(\ref{e-monotone}) whenever Walras' Law holds.
+
+We interpret (\ref{e-preference}) as revealing that the agent prefers prices
+$p$ over prices $q$. If $p^T z(q) \leq 0$, then $p^T x(q) \leq p^T b$, implying
+that both bundles $x(p)$ and $x(q)$ are affordable (feasible) at prices $p$.
+Since $x(p)$ is an optimal bundle at prices $p$, we know that it must be at least
+as preferred at $x(q)$, or that $u(x(p)) \geq u(x(q))$.
+
+Inequality~(\ref{e-monotone}) already shows that implication~(\ref{e-preference})
+holds, but to interpret the result economically, suppose that the
+implication did not hold, \ie, that $q^T z(p) < 0$. We would then have that
+$q^T x(p) < q^T b$, which implies that $x(p)$ and $x(q)$ are both affordable
+bundles at at prices $q$. However, we know that $u(x(p)) \geq u(x(q))$, so
+bundle $x(p)$ must be optimal, and Walras' Law implies $q^T x(p) = q^T b$, which
+gives a contradiction. 
+
+In the case of strict inequality, if $p^T z(q) < 0$, then $q^T z(p) > 0$.
+That is, $x(p)$ is revealed as preferred to $x(q)$, and $x(p)$ is not within
+budget at prices $q$, so prices $p$ are preferred by the agent.
+
+Note that if each agent's excess demand function is a monotone operator, then
+the market's aggregate excess demand function is also monotone. If these
+operators are \emph{maximal} monotone, then we can use the this framework for
+solving these problems. \todo[inline]{However, it is unclear if and when these
+operators are maximal.}
+
+Even in the case that the operators are monotone but not maximal, we still get
+a cutting-plane by computing the demand function. That is, for any prices $p$
+and optimal prices $p^*$, we have that
+\[
+p^{*T} z(p) \geq 0,
+\]
+which gives us a cutting-plane in the price simplex.
+A cutting-plane algorithm can then be used to compute the optimal prices
+
+\subsection{Computing the resolvent}
+The resolvent of the excess demand operator is
+\[
+(I + \lambda z)^{-1}(p) = q,
+\]
+which we parse to interpret as
+\[
+p = q + \lambda x(q).
+\]
+That is, given prices $p$, we must find prices $q$ such that the agent's UMP
+at prices $q$ satisfy the above quality.
+
+XXX: We can write down the optimality conditions, but these may put the same
+constraints on the utility functions as the Ye formulation. We can always
+substitute $p = q + \lambda x(q)$ into the opt conditions to remove either
+$q$ or $x$. But we end up with a non-convex problem. We optimize over the a
+non-convex region, something like the space outside of a unit ball.
+We may also be able to formulate the problem as being bi-convex in $x$ and $q$,
+but I'm not sure how helpful that would be.
 
 \newpage
 \bibliographystyle{alpha}
