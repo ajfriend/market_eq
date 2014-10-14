@@ -280,3 +280,4 @@ write the abstract first. exploiting sparsity. splitting.
 - give demand and excess demand functions
 - in the definitions section, give GS, WARP, and maybe monotone
 - add in proof of optimality of arrow-debreu as appendix.
+- - really good looking notes on variational ineq and monotone ops: <http://supernet.isenberg.umass.edu/courses/SCH-MGMT825-Spring14/VI_Lecture1_Nagurney.pdf>

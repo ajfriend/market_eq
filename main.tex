@@ -448,40 +448,65 @@ what work, what are representable
 
 \section{Solution methods}
 
+\subsection{Tatonnement}
+
+\subsection{Weighted total utility}
+put in the fisher stuff here. arrow-debreu can be solved this way, but we
+don't know the weights. introduce re-weighting idea.
+
 \subsection{CVXPY and SCS}
-\subsection{Exploiting sparsity}
-\subsection{Splitting}
-%handle splitting over agents, and also splitting over constraints. over agents needs no multiplication of variables, splitting over constraints does. find a prox regime that handles both easily.
 
-%inspect dual variables to guarantee some allocations are zero? this allows us to throw them out of the problem as we iterate.
+\subsection{Splitting with ADMM}
+We can use an ADMM-based splitting method \cite{boyd2011distributed} to
+solve the market equilibrium problem.
+For this purpose, we will use an indexing notation in this section which is
+more suitable for consensus ADMM.
 
-\todo[inline]{Introduce B and G relation notation. subscript notation.}
+Let $\mathcal{G}$ be an indexing set for all goods
+in the market.
+Agent $i$ will purchase amount $(x_i)_g$ of good $g \in \mathcal{G}$.
+(We will also write $x_{ig}$ to lighten notation.)
+Agent $i$'s utility is a function of the bundle $x_i \in \reals_{+}^{|G_i|}$,
+where $G_i \subset \mathcal{G}$ is the set of goods involved in the utility
+function $u_i$.
 
-We can use an ADMM-based splitting method to solve the market equilibrium problem.
-For full algorithmic generality, we will imagine a setting where each agent 
-is interested in only a small subset of the total avaible kinds of goods, and
-is also initially endowed only with a small subset of the total goods.
+Note that we don't specify the actual ordering of the elements
+of the vector $x_i$, as we will just care about the values associated with
+each good.
+When we do any operations (such as addition or scalar product) with
+two vectors corresponding to the same subset of goods, we will
+assume that the operation is done in a way that respects the local ordering of
+the goods.
 
-We'll switch to a variable notation more suitable for consensus ADMM.
-Let $\mathcal{G}$ be a set indexing all goods any agent could be interested in, 
-either by being involved in the agent's utility function, or because the agent is
-initially endowed with that good.
-Agent $i$'s utility function involves a subset of goods $G_i \subset \mathcal{G}$.
-Let $x_i \in \reals^{|G_i|}$ be agent $i$'s decision variable, where
-$(x_i)_g$ is the amount of good $g \in G_i$ in the agent's bundle.
-The agent is initially endowed with an allocation of goods $b_i \in \reals^{|B_i|}$,
-where $B_i \subset \mathcal{G}$, and $(b_i)_g$ is the amount of good $g$ endowed.
-The agent is also interested in the prices of goods. Let his local prices
-be $\phi_i \in \reals^{|G_i \cup B_i|}$.
-To lighten notation, we'll write $x_{ig}$, $b_{ig}$, and $\phi_{ig}$.
+Agent $i$ is also initially endowed with a set of goods $B_i \subset \mathcal{G}$,
+with allocation values $(b_i)_g = b_{ig}$, where $b_i \in \reals_{++}^{|B_i|}$.
+
+We will treat $G$ and $B$ as \emph{relations}, \emph{correspondences}, or
+\emph{multi-valued functions},
+using subscript notation instead of function notation.
+As we have seen, $G_i$ corresponds to the set of goods that agent $i$ is interested
+in possibly purchasing.
+The relation notation will also allow us to
+write $G^{-1}_g$ to denote the set of agents which are interested in good
+$g$.
+Similarly, $B^{-1}_g$ is the set of agents initially endowed with some
+positive amount of good $g$.
+
+In the ADMM algorithm, each agent will have a local opinion for the prices
+of the goods he is interested in purchasing or selling.
+Let his local prices
+be $\phi_i \in \reals_+^{|G_i \cup B_i|}$.
 
 Note that
 \[
 \bigcup_{i=1}^n G_i = \bigcup_{i=1}^n B_i = \mathcal{G}.
 \]
 
+For any variable $z \in \reals^{|\mathcal{G}|}$ which contains values for
+each good in the market, we may write $z_{G_i}$ to represent the subvector
+of $z$ whose elements correspond to the goods in $G_i$.
 
-For agent $i$, let  $f_i(x_i, \phi_i)$ be the indicator function for the constraints
+For agent $i$, let $f_i(x_i, \phi_i)$ be the indicator function for the constraints
 \[
 \begin{array}{c}
 \log(\nabla u_i(x_i)^T x_i) - \log(\nabla_g u_i(x_i)) + \phi_{ig} \geq  \log\left(\sum\limits_{k \in B_i} b_{ik} e^{\phi_{ik}}\right),\quad \forall g \in G_i\\
@@ -489,7 +514,7 @@ x_{ig} \geq 0, \quad \forall g \in G_i.
 \end{array}
 \]
 
-Then the problem we'd like to solve is given by
+\paragraph{ADMM problem form} Then the problem we'd like to solve is given by
 
 \[
 \begin{array}{ll}
@@ -500,7 +525,7 @@ Then the problem we'd like to solve is given by
 \]
 
 The first set of constraints are the global resource constraints; the amount of
-goods purchased by agents cannot exceede the total initial endowed amount.
+goods purchased by agents cannot exceed the total initial endowed amount.
 We can assume equality here (instead of an upper bound)
 since constraints are tight at the solution. This equality formulation gives
 a simpler ADMM iteration.
@@ -509,6 +534,8 @@ The second set of constraints are consensus constraints on the price variables,
 $\phi_i$. It simply says that all agents with an opinion, $\phi_{ij}$, on the price
 of good $g$ must agree. They agree through a global consensus variable $\Phi$.
 
+
+\paragraph{ADMM algorithm}
 Note that we have a generalized consensus problem in the price variables,
 $\phi$, and a generalized sharing problem in the allocation variables, $x$.
 
@@ -532,29 +559,19 @@ in considering that good.
 In equation~(\ref{a-phibar}), $\bar{\phi}^k_g$ gives the average of the price
 opinions $\phi^k_g$ over all agents with an interest in the price of good $g$.
 Dual variables $u^k$ and $w^k_i$ are updated in the next two equations.
-Note that $\tilde{x}^k_g$, $\bar{\phi}^k_g$, and $u^k$ are \emph{global} variables
+Note that $\tilde{x}^k$, $\bar{\phi}^k$, and $u^k$ are \emph{global} variables
 and that $w_i^k$, $x_i^{k+1}$, and $\phi_i^{k+1}$ are \emph{local} variables
 for each agent. In equation~(\ref{a-prox}), each agent compute the projection
 onto his local optimality constraints. Each agent emits their local results and the
 global computation of $\tilde{x}^{k+1}_g$ and $\bar{\phi}^{k+1}_g$ continues in the next
 step.
 
+The algorithm above is decentralized and parallelizable.
+Each agent can compute their prox operator separately and in parallel.
+The results of these prox operators are aggregated, averaged, and then distributed
+back to the individual agents for the next iteration.
 
-
-
-
-
-\subsection{Cutting plane}
-\subsection{Approximations?}
-can i approximate the exponential cone to do an approximate prox evaluation
-at each step, allowing for SOCP solvers that can't handle exponential cones?
-
-what if we approximate everything with a quadratic around the current iterate for an approximate projection? subset or superset of actual agent cutting set? does this simplification make updates with an analytic form, allowing for very fast iteration?
-
-\section{Huge, distributed models}
-\missingfigure{Add a yet to be made figure here.}
-
-\section{Monotone operators}
+\subsection{Monotone operators}
 For many utility functions \todo{when?}, the excess demand function (or correspondence,
 or relation) of an agent is a
 monotone operator.
@@ -578,7 +595,8 @@ We thus see that the implication
 \label{e-preference}
 p^T z(q) \leq 0 \implies q^T z(p) \geq 0
 \end{equation}
-is equivalent to inequality~(\ref{e-monotone}) whenever Walras' Law holds.
+is equivalent \todo{or just implies? is it actually true that they are
+equivalent?} to inequality~(\ref{e-monotone}) whenever Walras' Law holds.
 
 We interpret (\ref{e-preference}) as revealing that the agent prefers prices
 $p$ over prices $q$. If $p^T z(q) \leq 0$, then $p^T x(q) \leq p^T b$, implying
@@ -613,7 +631,7 @@ p^{*T} z(p) \geq 0,
 which gives us a cutting-plane in the price simplex.
 A cutting-plane algorithm can then be used to compute the optimal prices
 
-\subsection{Computing the resolvent}
+\paragraph{Computing the resolvent}
 The resolvent of the excess demand operator is
 \[
 (I + \lambda z)^{-1}(p) = q,
@@ -632,6 +650,25 @@ $q$ or $x$. But we end up with a non-convex problem. We optimize over the a
 non-convex region, something like the space outside of a unit ball.
 We may also be able to formulate the problem as being bi-convex in $x$ and $q$,
 but I'm not sure how helpful that would be.
+
+\subsection{Cutting plane}
+\paragraph{Approximations?}
+can i approximate the exponential cone to do an approximate prox evaluation
+at each step, allowing for SOCP solvers that can't handle exponential cones?
+
+what if we approximate everything with a quadratic around the current iterate for an approximate projection? subset or superset of actual agent cutting set? does this simplification make updates with an analytic form, allowing for very fast iteration?
+
+
+\section{Computational examples}
+\missingfigure{Add a yet to be made figure here.}
+
+\section{Application examples}
+\begin{itemize}
+\item traffic
+\item routing
+\item spectrum management
+\item others?
+\end{itemize}
 
 \newpage
 \bibliographystyle{alpha}
