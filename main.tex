@@ -57,7 +57,7 @@ Walras suggested his natural \emph{tatonnment} price adjustment scheme as a mean
 However, the convergence of tatonnement and conditions for existence of equilibrium prices remained an open problems for many years.
 
 The Nobel Laureates Arrow and Debreu were the first to show that equilibrium
-prices exist under mild conditions \cite{arrow1954existence}.
+prices exist under mild conditions on the utility functions of agents\cite{arrow1954existence}.
 However, these proofs relied on fixed-point theorems and were non-constructive.
 As such, they offered no practical means by which to compute these equilibria.
 
@@ -70,6 +70,8 @@ Jain's convex formulation was later extended by Chen, Ye, and Zhang \cite{chen20
 utility functions.
 
 Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory, eisenberg1961aggregation} gave a convex program for a special case of Walras' model which was independently developed by Fisher. %todo citation?
+This restricted case allows us to handle a larger family of utility functions
+with the convex framework.
 
 Our approach in this paper is to use the \emph{alternating direciton method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm for solving convex formulations of the market equilibrium problem.
 
