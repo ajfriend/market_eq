@@ -1,69 +1,155 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{todonotes}
 \usepackage{amssymb,amsmath}
+\usepackage[small,bf]{caption}
+
+% add bib to ToC
+\usepackage{tocbibind}
 
 \input defs.tex
 
 \title{Computing market equilibria via convex optimization}
-\author{AJ Friend \and Stephen Boyd}
+\author{A.J. Friend \and Stephen Boyd}
 \date{\today}
 
 \begin{document}
 
 \maketitle
 
+\begin{abstract}
+We consider the pure exchange market equilibrium problem of finding prices
+such that the market clears, \ie, demand does not exceed supply.
+This is a classic problem in economics, and has been discussed recently
+in the literature from a computational complexity perspective.
+Indeed, depending on the utility functions of the agents in the market,
+finding equilibrium prices can be NP-hard.
+This paper will focus on the numerical computation
+of equilibria for a subset of markets whose equilibrium
+problem can be cast as a convex program.
+We introduce algorithms which scale to huge markets and can be computed
+in a distributed fashion.
+We report numerical results for large random markets and for
+application examples in economic policy, wireless spectrum management,
+and internet advertising auctions.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
 \listoftodos
+\newpage
 
 \section{Introduction}
-we solve Fisher and Arrow-Debreu models using the formulations given in \todo{citations}. We use splitting and exploit sparsity to solve huge instances of these problems.
+We will consider exchange market equilibrium problems first introduced by
+Walras in his in ``Elements of Pure Economics''
+\cite{walras1896elements}.
+Walras considers a market with agents trading
+goods at prescribed prices to maximize their own utility functions.
+The market equilibrium problem is that of finding prices for the goods
+such that the total demand of the agents does not exceed the total amount
+of each good supplied by the agents for trade.
 
-\subsection{Applications}
-Some applications are given in Shoven and Whalley \cite{shoven1992applying}.
+In full generality, Walras' model includes \emph{production}, \ie, processes by which existing goods can be consumed to produce new goods which may enter the market.
+We restrict this paper to the pure exchange market, which allows for trading of existing goods, but not production.
+
+Walras suggested his natural \emph{tatonnment} price adjustment scheme as a means of computing equilibrium prices.
+However, the convergence of tatonnement and conditions for existence of equilibrium prices remained an open problems for many years.
+
+The Nobel Laureates Arrow and Debreu were the first to show that equilibrium
+prices exist under mild conditions \cite{arrow1954existence}.
+However, these proofs relied on fixed-point theorems and were non-constructive.
+As such, they offered no practical means by which to compute these equilibria.
+
+This paper will investigate convex formulations of the market
+equilibrium problem which were rediscovered by Jain \cite{jain2007polynomial}.
+The original formulations for linear utility functions
+%todo check
+were stated by Nenakov and Primak \cite{nenakov1983algorithm}.
+Jain's convex formulation was later extended by Chen, Ye, and Zhang \cite{chen2007note, chen2010equilibrium} to include some non-homogeneous
+utility functions.
+
+Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory, eisenberg1961aggregation} gave a convex program for a special case of Walras' model which was independently developed by Fisher. %todo citation?
+
+Our approach in this paper is to use the \emph{alternating direciton method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm for solving convex formulations of the market equilibrium problem.
+
+We provide examples and convergence results for large random markets, and 
+for application examples in economic policy, wireless spectrum management,
+and internet advertising auctions.
 
 \section{Market definitions}
-\subsection{Arrow-Debreu}
+\subsection{Exchange model}
+An \emph{exchange market} has $m$ agents and $n$ goods where
+agent $i$ has an initial endowment of goods $b_i \in \reals_+^n$.
+Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a
+bundle of goods $x_i \in \reals^n_{+}$,
+that is, he is allocated amount $x_{ij}$ of good $j$.
+Generally, $u_i$ is a concave and increasing function.
 
-An Arrow-Debreu market has $m$ agents and $n$ goods where
-agent $i$ has an initial amount $b_{ij} \in \reals_+$ of good $j$.
-Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \reals^m_{+}$.
-That is, he is allocated amount $x_{ij}$ of good $j$.
-Generally, $u_i$ is a concave, increasing function.
-
-Given prices $p \in \reals^n_{++}$ for each good, agent $i$ will sell his initial bundle of goods, $b_i \in \reals^n_+ $, and buy a bundle of goods $x_i$ to maximize his utility.
-That is, agent $i$ solves the \emph{utility maximization problem} problem
+Given prices $p \in \reals^n_{++}$ for the goods, agent $i$ will sell his
+initial bundle of goods, $b_i \in \reals^n_+ $, and buy a bundle of goods
+$x_i$ to maximize his utility.
+That is, agent $i$ solves the \emph{utility maximization problem} (UMP)
 
 \begin{equation}
 \label{p-ump}
 \begin{array}{ll}
 \mbox{maximize} & u_i(x_i) \\
 \mbox{subject to} & p^T x_i \leq p^T b_i \\
-& x_i \geq 0.
+& x_i \geq 0,
 \end{array}
 \end{equation}
+with optimization variable $x_i$.
 
-The \emph{Arrow-Debreu market equilibrium problem} is to find prices $p$ and an allocation matrix $x \in \reals^{m \times n}$ (where $x_i^T$ is the $i$th row of $x$) such that the following are true:
-\begin{itemize}
-\item $x \geq 0$
-\item $\sum_{i=1}^m x_{ij} \leq \sum_{i=1}^m b_{ij}$
-\item each agent achieves his optimal utility for the given prices
-\end{itemize}
+When it won't be confused with the optimization variable,
+we will denote the \emph{set} of solutions to the UMP as $x_i(p)$,
+and refer to it as the \emph{demand} of agent $i$ at prices $p$.
+Formally, $x_i : \reals^n_{++} \to 2^{\reals^n_+}$ is a
+\emph{relation}, \emph{set-valued mapping}, or \emph{correspondence}.
+When the optimal bundle is unique, we may think of
+the demand as a \emph{function}.
 
-The second constraint simply states that the final total amount of each good cannot exceed the initial total amount.
-This model is also referred to as the Walras model \cite{walras1896elements}, or the exchange model.
+The \emph{exchange market equilibrium problem} is to find prices $p$
+such that the demand for goods in the market does not exceed the supply
+provided by the initial agent endowments.
+When the demands are all functions, we can write this constraint as
+\[
+\sum_{i=1}^m x_{i}(p) \leq \sum_{i=1}^m b_i = B,
+\]
+where $B \in \reals^n_{++}$ is the
+the total amount of goods in the market available for purchase.
 
-Arrow and Debreu showed that equilibrium prices exist in the general case of concave utility functions \cite{arrow1954existence}. However, the proof was nonconstructive and they did not provide an algorithm to compute the equilibrium.
+For the markets we will consider, it will be the case that demand is
+always exactly equal to supply at optimal prices,
+so we may write the inequality as an equality when it is convenient. 
 
+In the case of demand relations, we can write the equilibrium
+condition as
+\[
+0 \in \sum_{i=1}^m x_{i}(p) - B.
+\]
+This is equivalent to the constraint that there exist some
+allocations $y_i \in x_i(p)$ such that
+\[
+\sum_{i=1}^m y_i = B.
+\]
 
-\subsection{Fisher}
+The exchange model is also referred to as the Walras model \cite{walras1896elements},
+the pure exchange model, or the Arrow-Debreu model. %todo cite for Arrow-Debreu
 
-A Fisher market has $m$ agents and $n$ goods where
-agent $i$ has an initial amount of money $w_i \in \reals_+$.
-The total amount of good $j$ available for purchase is given by $b_j$.
-Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in \mathbf{R}^m_{+}$. That is, he is allocated amount $x_{ij}$ of good $j$.
+\subsection{Fisher model}
+This market has $m$ agents and $n$ goods where
+agent $i$ has an initial amount of money, or wealth, $w_i \in \reals_{++}$.
+The total amount of good $j$ available for purchase is given by
+$B_j \in \reals_{++}$.
+Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a
+bundle of goods $x_i \in \mathbf{R}^m_{+}$. That is, he is allocated amount
+$x_{ij}$ of good $j$.
 Generally, $u_i$ is a concave, increasing function.
 
-Given prices $p \in \reals^n_{++}$ for each good, agent $i$ uses his initial money $w_i$ to buy a bundle of goods $x_i$ to maximize his utility. That is, agent $i$ solves the optimization problem
+Given prices $p \in \reals^n_{++}$ for each good, agent $i$ uses his initial
+wealth $w_i$ to buy a bundle of goods $x_i$ to maximize his utility.
+That is, agent $i$ solves the optimization problem
 \[
 \begin{array}{ll}
 \mbox{maximize} & u_i(x_i) \\
@@ -72,26 +158,29 @@ Given prices $p \in \reals^n_{++}$ for each good, agent $i$ uses his initial mon
 \end{array}
 \]
 
-The \emph{Fisher market equilibrium problem} is to find prices $p$ and an allocation matrix $x \in \reals^{m \times n}$ (where $x_i^T$ is the $i$th row of $x$) such that the following are true:
-\begin{itemize}
-\item $x \geq 0$
-\item $\sum_{i=1}^m x_{ij} \leq b_j$
-\item each agent achieves his optimal utility for the given prices
-\end{itemize}
+We will again use $x_i(p)$ to denote the demand function or relation for
+this agent's UMP.
 
-The second constraint simply states that the final total amount of each good cannot exceed the initial available amount.
+The \emph{Fisher market equilibrium problem} is to find prices $p$ such that
+\[
+0 \in \sum_{i=1}^m x_{i}(p) - B.
+\]
+Again, this is just the requirement that demand equals supply
+at prices $p$.
+
+\paragraph{Fisher is a special case of Arrow-Debreu}
+We can cast any Fisher equilibrium problem as an Arrow-Debreu market problem.
+Let $w_i$ be the wealth of agent $i$ and  $B$ be the total amount of goods in
+the Fisher system.
+Let $W = \sum_{i=1}^m w_i$ be the total wealth in the Fisher market.
+For the Arrow-Debreu market, assign initial bundle of goods
+$b_i = B w_i/W$ to agent $i$.
+Since the scaling of $p$ in the Arrow-Debreu problem is arbitrary,
+this gives the correct proportion of wealth to each agent with the correct
+total amount of goods.
 
 
-
-\subsection{Fisher is a special case of Arrow-Debreu}
-two different transformations for this
-\begin{itemize}
-\item add an agent and a single good (money)
-\item make the initial endowment for each agent proportional,
-so each agent has a constant proportion between goods, but some agents have more total goods than others. 
-\end{itemize}
-
-\section{Definitions}
+\section{Definitions of market properties}
 We'll list some intial definitions here which will be used throughout the remainder of the paper.
 For a review of convexity and convex optimization, see
 \cite{boyd2009convex}.
@@ -102,49 +191,53 @@ The utility function is \emph{monotone} if $x \geq y$ implies that $u(x) \geq u(
 It is \emph{homogeneous} of degree $d$ if for any $\alpha > 0$,
 $u(\alpha x) = \alpha^d u(x)$.
 
-When it doesn't cause confusion, we will write the \emph{demand relation} (or \emph{demand function}
-when the relation is single-valued) of agent $i$ as $x_i(p)$, defined as the set of solutions to that agent's
+As we saw previously, we will write the \emph{demand relation}
+(or \emph{demand function}
+when the relation is single-valued) of agent $i$ as $x_i(p)$,
+defined as the set of solutions to that agent's
 utility maximization problem~(\ref{p-ump}) at given market prices $p$.
 
 The \emph{excess demand function} is $z_i(p) = x_i(p) - b_i$.
 
 Note that the market is in equilibrium if we find prices so that
 \[
-\sum_i z_i(p) \leq 0.
+0 \in \sum_i z_i(p).
 \]
 
 The \emph{aggregate demand} and \emph{aggregate excess demand} functions are,
 respectively,
 
 \begin{align*}
-X(p) = \sum_i x_i(p)\\
-Z(p) = \sum_i z_i(p).
+X(p) &= \sum_i x_i(p)\\
+Z(p) &= \sum_i z_i(p).
 \end{align*}
 
-A demand function satisfies \emph{Walras' Law} if
+An agent's demand function $x(p)$ satisfies \emph{Walras' Law} if
 \[
-p^T x_i(p) = p^T b,
+p^T x(p) = p^T b,
 \]
-or, equivalently, $p^T z_i(p) = 0$.
+or, equivalently, $p^T z(p) = 0$.
+Walras' Law just says that an agent spends his entire budget to
+maximize his utility.
 
 A demand function satisfies the \emph{weak axiom of revealed preferences}
-(WARP) if, for any two price vectors $p$ and $p'$, we have
-\[
-p^T x_i(p') \leq 0 \implies p'^T x_i(p) \leq 0.
-\]
-\todo{Note that we can interpret this condition in terms of preference cutting planes.}
+(WARP) if, for any two price vectors $p$ and $q$, we have the equivalent
+conditions
+\begin{align*}
+p^T x(q) \leq p^T b &\implies q^T x(p) \geq q^T b,\\
+p^T z(q) \leq 0 &\implies q^T z(p) \geq 0.
+\end{align*}
 
-If we assume Walras' Law, note that WARP is equivalent to the demand function
-being a \emph{monotone operator}. That is, for any two price vectors $p$ and $p'$,
-\[
-\left(x(p) - x(p')\right)^T (p - p') \leq 0.
-\]
-\todo[inline]{Figure out maximality of this operator. How do negative prices work?
-Could we just restrict the UMP to have $p^Tx \geq 0$?}
+We can interpret WARP as follows.
+If bundle $x(p)$ is revealed to be at least as preferred as bundle
+$x(q)$ (because they are both within budget at prices $p$), then
+$x(p)$ must be at least as expensive as bundle $x(q)$ at prices $q$.
+WARP can be interpreted as requireing that agent's preferences be
+consistent in some sense.
 
-A demand function satisfies \emph{weak gross substitutability} (WGS)
-if when $p$ and $p'$ are such that for some $i$, $p'_i > p_i$ and
-$p'_k = p_k$ for $k \neq i$, then $x_k(p') \geq x_k(p)$ for $k \neq i$.
+A demand function $x(p)$ satisfies \emph{weak gross substitutability} (WGS)
+if when $p$ and $q$ are such that for some $i$, $q_i > p_i$ and
+$q_k = p_k$ for $k \neq i$, then $x_k(q) \geq x_k(p)$ for $k \neq i$.
 We can interpret this definition as requiring that if a single price increases,
 then the demand for all other goods cannot decrease.
 
@@ -153,7 +246,18 @@ For differentiable demand functions, we could write something like
 \frac{\partial x_k(p)}{\partial p_i} \geq 0,\quad k \neq i.
 \]
 
-GS is a bit of a restrictive condition. WARP is a more natural condition in some
+WARP and WGS are significant because they both imply that
+the aggregate excess demand functions supply cutting planes which can
+be used to find optimal market prices.
+That is, for any prices $p$ and optimal prices $p^\star$, we have that
+\[
+p^{\star T} Z(p) \geq 0.
+\]
+Thus, for any market satisfying WGS or WARP, the set of optimal prices
+is convex.
+\todo[inline]{this is easy to see for WARP. what's the proof for WGS?}
+
+XXX: GS is a bit of a restrictive condition. WARP is a more natural condition in some
 sense, as it is simply requiring that agents make consistent choices.
 
 (Reasonable assumptions for the market are Walras' Law and 0-homogeneity.
@@ -178,68 +282,151 @@ see note at end of pg 113: see EX 4.c.13 and Section 17.F
 
 \section{Problem History}
 \subsection{Formation and proof of existence}
-Walras formulated his original market model in ``Elements of Pure Economics'' \cite{walras1896elements}. While he did not rigorously prove that equilibrium prices must exist, he did propose the first algorithm for computing the prices through his \emph{tatonnement} price updating scheme.
+Walras formulated his original market model in ``Elements of Pure Economics''
+\cite{walras1896elements}. While he did not rigorously prove that equilibrium
+prices must exist, he did propose the first algorithm for computing the prices
+through his \emph{tatonnement} price updating scheme.
 
-Arrow and Debreu \cite{arrow1954existence} were the first to show that equilibrium prices exist in a setting with concave utilities. The proof relies on a fixed point theorem and is thus non-constructive. As a result, it offers no obvious avenues for actually computing the equilibrium.
+Arrow and Debreu \cite{arrow1954existence} were the first to show that
+equilibrium prices exist in a setting with concave utilities.
+The proof relies on a fixed point theorem and is thus non-constructive.
+As a result, it offers no obvious avenues for actually computing the
+equilibrium.
 
-Arrow, Block and Hurwicz \cite{arrow1959stability} showed that for markets satisfying weak gross substitutability, a continuous-time tatonnement process would always converge to equilibrium prices.
+Arrow, Block and Hurwicz \cite{arrow1959stability} showed that for markets
+satisfying weak gross substitutability, a continuous-time tatonnement process
+would always converge to equilibrium prices.
 
-\todo{would be nice to give the reader an idea at this point of what is tractable and what isn't. np-hard, disconnected solution sets...}
+\todo{would be nice to give the reader an idea at this point of what is
+tractable and what isn't. np-hard, disconnected solution sets...}
 
 \subsection{Fisher case}
 For the case of Fisher markets,
 Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory} and
-Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization formulation for computing equilibrium first for linear utility functions, and then for the more general case of concave functions which are homogeneous with degree 1.
-Jain et al. \cite{jain2005market} generalized this model to handle homothetic and quasi-concave utilities.
+Eisenberg \cite{eisenberg1961aggregation} gave a convex optimization
+formulation for computing equilibrium first for linear utility functions,
+and then for the more general case of concave functions which are homogeneous
+with degree 1.
+Jain et al. \cite{jain2005market} generalized this model to handle homothetic
+and quasi-concave utilities.
 Examples of these utilities were introduced by Friedman
 \cite{friedman1973concavity}.
-\todo{rephrase}However, it is unclear if the transformation given in \cite{jain2005market} is of practical use in a convex optimization setting.
+\todo{rephrase}However, it is unclear if the transformation given in
+\cite{jain2005market} is of practical use in a convex optimization setting.
 
-It is important to note that the Fisher model is a special case of the Arrow-Debreu model. However, the Fisher case is strictly easier than the Arrow-Debreu case. For example, Codenotti et al.\ \cite{codenotti2006leontief} show that the Arrow-Debreu problem with Leontief utilities is NP-hard, while the Fisher problem with Leontief utilities remains a convex program.
+It is important to note that the Fisher model is a special case of the
+Arrow-Debreu model. However, the Fisher case is strictly easier
+\todo{easier in what sense? consider \cite{chen2009spending}} than the
+Arrow-Debreu case. For example, Codenotti et al.\ \cite{codenotti2006leontief}
+show that the Arrow-Debreu problem with Leontief utilities is NP-hard, while
+the Fisher problem with Leontief utilities remains a convex program.
 
 \subsection{Initial algorithms}
 
 Scarf and others \cite{scarf2008applied,eaves1972homotopies,kuhn1968simplicial}
-expanded on the fixed-point existence theorems to produce algorithms for computing equilibria based on traversing a decomposed price simplex. However, these algorithms have exponential running time in the worst case. Scarf's algorithm is also described in the text \cite{shoven1992applying}.
+expanded on the fixed-point existence theorems to produce algorithms for
+computing equilibria based on traversing a decomposed price simplex.
+However, these algorithms have exponential running time in the worst case.
+Scarf's algorithm is also described in the text \cite{shoven1992applying}.
 
-Smale \cite{smale1976convergent, smale1976exchange} developed Newton-based methods which are guaranteed to converge, but with no running time guarantee.
+Smale \cite{smale1976convergent, smale1976exchange} developed Newton-based
+methods which are guaranteed to converge, but with no running time guarantee.
 
-The convergent continuous-time tatonnement process of Arrow, Block and Hurwicz \cite{arrow1959stability} was extended to a discrete-time (and thus computationally implementable) version by Codenotti, McCune and Varadarajan \cite{codenotti2005marketExcess}, who were able to show that it converges for WGS markets in polynomial time.
+The convergent continuous-time tatonnement process of Arrow, Block and Hurwicz
+\cite{arrow1959stability} was extended to a discrete-time
+(and thus computationally implementable) version by Codenotti, McCune and
+Varadarajan \cite{codenotti2005marketExcess}, who were able to show that it
+converges for WGS markets in polynomial time.
 
-Negishi \cite{negishi1960welfare} shows that the exchange model equilibrium is given by a convex program whose objective is a linear combination of the utility functions, but with unknown weights. Thus, the computational task is to find these positive weights. A process similar to tatonnement can be performed in the space of weights and is shown by Mantel \cite{mantel1971welfare} to be convergent under certain conditions.
+Negishi \cite{negishi1960welfare} shows that the exchange model equilibrium is
+given by a convex program whose objective is a linear combination of the
+utility functions, but with unknown weights.
+Thus, the computational task is to find these positive weights.
+A process similar to tatonnement can be performed in the space of weights
+and is shown by Mantel \cite{mantel1971welfare} to be convergent under certain
+conditions.
 
 \subsection{Cutting plane methods}
-While working on tatonnement, Arrow, Block and Hurwicz \cite{arrow1959stability} proved a separating hyperplane lemma which would form the basis of much future work. The lemma showed that for any given (non-equilibrium) prices, a function called the aggregate excess demand provided a cutting plane in the price simplex, identifying which half-space contained the equilibrium prices.
-This cutting plane result held for a class of utility functions satisfying weak gross substitutability.
+While working on tatonnement, Arrow, Block and Hurwicz \cite{arrow1959stability}
+proved a separating hyperplane lemma which would form the basis of much future
+work.
+The lemma showed that for any given (non-equilibrium) prices, a function called
+the aggregate excess demand provided a cutting plane in the price simplex,
+identifying which half-space contained the equilibrium prices.
+This cutting plane result held for a class of utility functions satisfying
+weak gross substitutability.
 
-An immediate corollary of this result is that for markets with the GS property, the set of equilibrium prices is convex. \todo{specifically, positive homogeneous, GS, and Walras' law} \todo{later generalized to weak GS}
-However, even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}. Also, \cite[p.~608]{mas1995microeconomic} shows that WGS and WARP Arrow-Debreu markets have convex equilibria.
+An immediate corollary of this result is that for markets with the GS property,
+the set of equilibrium prices is convex.
+\todo{specifically, positive homogeneous, GS, and Walras' law. later generalized to weak GS}
+However, even for some natural homogeneous (but not GS) functions,
+the Arrow-Debreu equilibrium may be disconnected
+(and thus certainly not convex) \cite{gjerstad1996multiple}.
+Also, \cite[p.~608]{mas1995microeconomic} shows that WGS and WARP Arrow-Debreu
+markets have convex equilibria.
 
-This line of worked was continued by Polterovich, Spivak, Primak, Newman, and Nenakov \cite{nenakov1983algorithm,newman1992complexity,primak1984algorithm,primak1993converging}.
+This line of worked was continued by Polterovich, Spivak, Primak, Newman,
+and Nenakov \cite{nenakov1983algorithm,newman1992complexity,primak1984algorithm,primak1993converging}.
 
-Later, a polynomial time algorithm was given by Codenotti, Pemmaraju and Varadarajan \cite{codenotti2005polynomial}. This result held for markets whose aggregate excess demand function satisfied weak gross substitutability. It combined the cutting plane result with an ellipsoid method to produce a polynomial time algorithm. This is one of the most general settings for the exchange problem and includes many utility functions. This result was later extended by McCune \cite{mccune2007extending} to markets with multi-valued aggregate excess demand functions, which includes linear utility functions.
+Later, a polynomial time algorithm was given by Codenotti, Pemmaraju and
+Varadarajan \cite{codenotti2005polynomial}.
+This result held for markets whose aggregate excess demand function satisfied
+weak gross substitutability.
+It combined the cutting plane result with an ellipsoid method to produce a
+polynomial time algorithm.
+This is one of the most general settings for the exchange problem and includes
+many utility functions. This result was later extended by McCune
+\cite{mccune2007extending} to markets with multi-valued aggregate excess
+demand functions, which includes linear utility functions.
 
 \subsection{Convex formulations}
-Even though we have a proof that Arrow-Debreu equilibria are given by a convex set, these problems still may not be easily solved with convex optimization.
-The computational thread that we will follow in this paper started when Jain \cite{jain2007polynomial} rediscovered a convex formulation originally stated by Nenakov and Primak \cite{nenakov1983algorithm}. This formulation was later extended by Chen, Ye and Zhang \cite{chen2007note,chen2010equilibrium} to include some non-homogeneous utility functions. The set of functions covered by this formulation is more restrictive than the WGS setting of the previous section. \todo{how does this fit into the WGS framework?}
+Even though we have a proof that Arrow-Debreu equilibria are given by a
+convex set, these problems still may not be easily solved with convex
+optimization.
+The computational thread that we will follow in this paper started when
+Jain \cite{jain2007polynomial} rediscovered a convex formulation originally
+stated by Nenakov and Primak \cite{nenakov1983algorithm}.
+This formulation was later extended by Chen, Ye and
+Zhang \cite{chen2007note,chen2010equilibrium} to include some non-homogeneous
+utility functions.
+The set of functions covered by this formulation is more restrictive than the
+WGS setting of the previous section. \todo{how does this fit into the
+WGS framework?}
 
-Again, we will mention that even for some natural homogeneous (but not GS) functions, the Arrow-Debreu equilibrium may be disconnected (and thus certainly not convex) \cite{gjerstad1996multiple}.
-Also, is shown in \cite{codenotti2006leontief} that the Arrow-Debreu problem with Leontief utilities is NP-hard.
-We can see that the computability of equilibrium very much depends on the properties of the utility functions.
+Again, we will mention that even for some natural homogeneous (but not GS)
+functions, the Arrow-Debreu equilibrium may be disconnected
+(and thus certainly not convex) \cite{gjerstad1996multiple}.
+Also, is shown in \cite{codenotti2006leontief} that the Arrow-Debreu
+problem with Leontief utilities is NP-hard.
+We can see that the computability of equilibrium very much depends on the
+properties of the utility functions.
 
 
 \subsection{Other approaches}
-Codenotti et al.\ \cite{codenotti2005market,codenotti2005marketCES} form a convex program for exchange economies with CES utility functions that do not satisfy WGS.
+Codenotti et al.\ cite{codenotti2005market, codenotti2005marketCES} form a
+convex program for exchange economies with CES utility functions that do not
+satisfy WGS.
 
 \subsection{Models with production}
-Arrow-Debreu models which include the production of goods are studied in \cite{garg2014computability,jain2005market,codenotti2005marketExcess}, with an overview in \cite[Chapters~5--6]{nisan2007algorithmic}. \todo{there are many other papers to include}
+Arrow-Debreu models which include the production of goods are studied
+in \cite{garg2014computability,jain2005market,codenotti2005marketExcess},
+with an overview in \cite[Chapters~5--6]{nisan2007algorithmic}.
+\todo{there are many other papers to include}
 
 \subsection{References}
-Good surveys of the literature can be found in Chapters 5 and 6 of \cite{nisan2007algorithmic} and McCune's 2009 thesis \cite{mccune2009algorithmic}.
+Good surveys of the literature can be found in Chapters 5 and 6 of
+\cite{nisan2007algorithmic} and McCune's 2009 thesis \cite{mccune2009algorithmic}.
 
-The market equilibrium problem, including existence proofs, formulations of central concepts such as demand functions, Walras' Law, and the cutting plane property, is also covered in many popular economics texts, such as \cite{varian1992microeconomic, mas1995microeconomic, luenberger1995microeconomic, kreps1990course}.
+The market equilibrium problem, including existence proofs, formulations of
+central concepts such as demand functions, Walras' Law, and the cutting plane
+property, is also covered in many popular economics texts, such as
+\cite{varian1992microeconomic, mas1995microeconomic,
+luenberger1995microeconomic, kreps1990course}.
 
-Experimental results comparing various algorithms can be found in Codenotti et al.\ \cite{codenotti2008experimental}. They compare discrete versions of tatonnement and welfare adjustment, as well as convex formulations for some specific markets.
+Experimental results comparing various algorithms can be found in Codenotti
+et al.\ \cite{codenotti2008experimental}.
+They compare discrete versions of tatonnement and welfare adjustment,
+as well as convex formulations for some specific markets.
 
 
 \section{Convex optimization formulations}
@@ -247,8 +434,11 @@ Experimental results comparing various algorithms can be found in Codenotti et a
 
 \subsection{Fisher}
 
-The Fisher equilibrium problem is solved by the following convex program when the utility functions are concave and homogeneous of degree 1 \cite{eisenberg1959consensus, gale1960theory, eisenberg1961aggregation}.
-See \cite[Section~6.2]{nisan2007algorithmic} for the optimality conditions and proof:
+The Fisher equilibrium problem is solved by the following convex program
+when the utility functions are concave and homogeneous of degree 1
+\cite{eisenberg1959consensus, gale1960theory, eisenberg1961aggregation}.
+See \cite[Section~6.2]{nisan2007algorithmic} for the optimality conditions
+and proof:
 
 \[
 \begin{array}{ll}
@@ -261,7 +451,8 @@ See \cite[Section~6.2]{nisan2007algorithmic} for the optimality conditions and p
 Here, the prices appear as dual variables.
 
 \subsection{Arrow-Debreu}
-It can be shown that a market equilibrium always exists and can be found by solving the problem
+It can be shown that a market equilibrium always exists and can be found by
+solving the problem
 
 \[
 \begin{array}{ll}
@@ -273,7 +464,8 @@ It can be shown that a market equilibrium always exists and can be found by solv
 \]
 
 
-The above problem is not convex but can be easily transformed by a simple change of variables. Specifically, let $p_j = \exp(\phi_j)$.
+The above problem is not convex but can be easily transformed by a
+simple change of variables. Specifically, let $p_j = \exp(\phi_j)$.
 Then the problem becomes
 
 \[
@@ -298,11 +490,16 @@ Throughout the remainder, we'll use the following formulation:
 \end{array}
 \]
 
-Note that the first constraint need only be explicitly formed when $\nabla_j u_i(x_i) > 0$, and we only need to include terms in the sum in
-$\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. These ideas will be used later when we exploit sparsity to solve these problems efficiently.
+Note that the first constraint need only be explicitly formed when
+$\nabla_j u_i(x_i) > 0$, and we only need to include terms in the sum in
+$\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$.
+These ideas will be used later when we exploit sparsity to solve these
+problems efficiently.
 
 \paragraph{Convexity}
-We see that the convexity of this formulation depends on the agents' utility functions. The formulation is convex if
+We see that the convexity of this formulation depends on the agents'
+utility functions.
+The formulation is convex if
 \[
 \log(\nabla u_i(x_i)^T x_i) - \log(\nabla_j u_i(x_i))
 \]
@@ -315,7 +512,12 @@ Note that, for homogeneous functions, Euler's identity gives that
 \todo[inline]{Some special care needs to be taken here for nonsmooth functions.}
 
 \section{Utility functions}
-For each utility function, we'll list if it works in the Fisher setting, the convex formulation given by \cite{chen2010equilibrium}, or the cutting plane setting. List if homogeneous, GS or weak GS, and if demand is a function or a relation. if it satisfies walras' law, etc. Also, show how functions are representable in a DCP system.
+For each utility function, we'll list if it works in the Fisher setting,
+the convex formulation given by \cite{chen2010equilibrium},
+or the cutting plane setting.
+List if homogeneous, GS or weak GS, and if demand is a function or a relation.
+if it satisfies walras' law, etc. Also, show how functions are representable
+in a DCP system.
 
 \subsection{Linear}
 \[
@@ -335,6 +537,7 @@ is concave and
 is constant, therefore convex.
 
 \paragraph{Cutting plane}
+cutting plane info
 \todo[inline]{satisfies WGS, is multi-valued, WARP}
 
 \subsection{Constant elasticity of substitution (CES)}
@@ -348,17 +551,19 @@ May not be tractable when $\rho < -1$.
 \todo{note special cases: linear, cobbdouglas, leonteif}
 
 \paragraph{Fisher}
-This utility works in the Fisher setting, as it is concave and homogeneous of degree 1.
+This utility works in the Fisher setting, as it is concave and homogeneous of
+degree 1.
 
 \paragraph{Arrow-Debreu}
 Some algebra shows that 
 \begin{align*}
 \log(\nabla u(x)^T x) - \log(\nabla_j u(x)) =
-\log\left(\sum_{j=1}^n a_j x_j^\rho \right) - \log a_j + (1-\rho) \log x_j,
+\log\left(\sum_{k=1}^n a_k x_k^\rho \right) - \log a_j + (1-\rho) \log x_j,
 \end{align*}
 which is indeed concave when $0 < \rho \leq 1$.
 
-\todo[inline]{Codenotti and McCune extend the convex formulation to handle $-1 \leq \rho < 0$.}
+\todo[inline]{Codenotti and McCune extend the convex formulation to handle
+$-1 \leq \rho < 0$.}
 
 \paragraph{Demand}
 We can derive the demand for the CES utility through the KKT conditions of the
@@ -371,7 +576,8 @@ where $r = \rho/(\rho-1)$.
 \paragraph{Cutting plane} I think it is GS
 
 \subsection{Nested CES}
-see \cite{shoven1992applying} for examples and applications.  \todo{when is CES convex? nested is convex?}
+see \cite{shoven1992applying} for examples and applications.
+\todo{when is CES convex? nested is convex?}
 
 \subsection{Cobb-Douglas}
 \[
@@ -417,6 +623,16 @@ leonteif is a special case. why is it no WGS?
  where $a_j, b_j \geq 0$ and $0 \leq d_j \leq 1$.
  Note that these need not be homothetic. Consider $u(x,y) = \sqrt{x} + y$.
 
+ \paragraph{Arrow-Debreu}
+We find that 
+\begin{align*}
+\log(\nabla u(x)^T x) - \log(\nabla_j u(x))
+&= \log\left(\sum_{k=1}^n a_k d_k (x_k+b_k)^{d_k} - \frac{a_k d_k b_k}{(x_k + b_k)^{1-d_k}} \right)\\
+&\quad- \log(a_j d_j) + (1-d_j)\log (x_j + b_j),
+\end{align*}
+which is seen to be concave.
+
+
 \subsection{Logarithmic}
 \[
 u(x) = \sum_{j=1}^n a_j \log(x_j+ b_j),
@@ -428,16 +644,25 @@ From the optimality conditions, we find that
 \[
 x_j = \max(0, \tau a_j/p_j - b_j),
 \]
-where $\tau \geq 0$ is some constant such that $\sum_j p_j x_j = p^Tb$. \todo{fix the b variable here.}
+where $\tau \geq 0$ is some constant such that $\sum_j p_j x_j = p^Tb$.
+\todo{fix the b variable here.}
 This is basically \emph{water-filling}.
 
+\paragraph{Arrow-Debreu}
+We find that 
+\begin{align*}
+\log(\nabla u(x)^T x) - \log(\nabla_j u(x)) =
+\log\left(\sum_{k=1}^n a_k - \frac{a_k b_k}{x_k+b_k} \right) - \log a_j + \log (x_j + b_j),
+\end{align*}
+which is indeed concave.
 
 
 \subsection{Arrow-Debreu}
 things that work are:
 \begin{itemize}
 \item linear
-\item CES with $\rho > 0$ (Codenotti may be able to write another program that handles $\rho < 0$.)
+\item CES with $\rho > 0$ (Codenotti may be able to write another program
+that handles $\rho < 0$.)
 \item Cobb-Douglas
 \end{itemize}
 what work, what are representable
@@ -447,6 +672,10 @@ what work, what are representable
 \end{itemize}
 
 \section{Solution methods}
+
+\subsection{Infinite LP/cutting plane methods}
+That WGS gives a cutting plane is proved in \cite{arrow1959stability}.
+(supposedly... check, as the papers have similar names.)
 
 \subsection{Tatonnement}
 
@@ -478,13 +707,15 @@ two vectors corresponding to the same subset of goods, we will
 assume that the operation is done in a way that respects the local ordering of
 the goods.
 
-Agent $i$ is also initially endowed with a set of goods $B_i \subset \mathcal{G}$,
+Agent $i$ is also initially endowed with a set of goods
+$B_i \subset \mathcal{G}$,
 with allocation values $(b_i)_g = b_{ig}$, where $b_i \in \reals_{++}^{|B_i|}$.
 
 We will treat $G$ and $B$ as \emph{relations}, \emph{correspondences}, or
 \emph{multi-valued functions},
 using subscript notation instead of function notation.
-As we have seen, $G_i$ corresponds to the set of goods that agent $i$ is interested
+As we have seen, $G_i$ corresponds to the set of goods that agent $i$ is
+interested
 in possibly purchasing.
 The relation notation will also allow us to
 write $G^{-1}_g$ to denote the set of agents which are interested in good
@@ -506,7 +737,8 @@ For any variable $z \in \reals^{|\mathcal{G}|}$ which contains values for
 each good in the market, we may write $z_{G_i}$ to represent the subvector
 of $z$ whose elements correspond to the goods in $G_i$.
 
-For agent $i$, let $f_i(x_i, \phi_i)$ be the indicator function for the constraints
+For agent $i$, let $f_i(x_i, \phi_i)$ be the indicator function for the
+constraints
 \[
 \begin{array}{c}
 \log(\nabla u_i(x_i)^T x_i) - \log(\nabla_g u_i(x_i)) + \phi_{ig} \geq  \log\left(\sum\limits_{k \in B_i} b_{ik} e^{\phi_{ik}}\right),\quad \forall g \in G_i\\
@@ -572,7 +804,8 @@ The results of these prox operators are aggregated, averaged, and then distribut
 back to the individual agents for the next iteration.
 
 \subsection{Monotone operators}
-For many utility functions \todo{when?}, the excess demand function (or correspondence,
+For many utility functions \todo{when?}, the excess demand function
+(or correspondence,
 or relation) of an agent is a
 monotone operator.
 That is,
@@ -638,7 +871,7 @@ The resolvent of the excess demand operator is
 \]
 which we parse to interpret as
 \[
-p = q + \lambda x(q).
+p = q + \lambda x(q) - \lambda b.
 \]
 That is, given prices $p$, we must find prices $q$ such that the agent's UMP
 at prices $q$ satisfy the above quality.
@@ -656,13 +889,18 @@ but I'm not sure how helpful that would be.
 can i approximate the exponential cone to do an approximate prox evaluation
 at each step, allowing for SOCP solvers that can't handle exponential cones?
 
-what if we approximate everything with a quadratic around the current iterate for an approximate projection? subset or superset of actual agent cutting set? does this simplification make updates with an analytic form, allowing for very fast iteration?
+what if we approximate everything with a quadratic around the current iterate
+for an approximate projection? subset or superset of actual agent cutting set?
+does this simplification make updates with an analytic form, allowing for very
+fast iteration?
 
 
 \section{Computational examples}
-\missingfigure{Add a yet to be made figure here.}
+%\missingfigure{Add a yet to be made figure here.}
 
 \section{Application examples}
+\cite{shoven1992applying}
+
 \begin{itemize}
 \item traffic
 \item routing
@@ -670,9 +908,16 @@ what if we approximate everything with a quadratic around the current iterate fo
 \item others?
 \end{itemize}
 
+\appendix
+\section{first}
+some stuff
+\section{secon}
+more stuff
+
+
 \newpage
 \bibliographystyle{alpha}
-\bibliography{bibliography.bib}
+\bibliography{bibliography}
 
 \end{document}
 

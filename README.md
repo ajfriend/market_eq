@@ -281,3 +281,15 @@ write the abstract first. exploiting sparsity. splitting.
 - in the definitions section, give GS, WARP, and maybe monotone
 - add in proof of optimality of arrow-debreu as appendix.
 - - really good looking notes on variational ineq and monotone ops: <http://supernet.isenberg.umass.edu/courses/SCH-MGMT825-Spring14/VI_Lecture1_Nagurney.pdf>
+
+# Tue Oct 14 23:24:05 2014
+- go through mas-collel notes again
+- review early codenotti papers and mccune thesis
+- On the Polynomial Time Computation of Equilibria for Certain Exchange
+- Market Equilibrium in Exchange Economies with Some Families of Concave Utility Functions
+
+## monotonicity papers
+- PSEUDOMONOTONE FUNCTIONS AND
+AN APPLICATION IN THE THEORY OF GENERAL ECONOMIC EQUILIBRIUM
+- On Revealed Preference Analysis
+- On the uniqueness of equilibrium once again
