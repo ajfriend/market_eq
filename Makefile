@@ -17,7 +17,7 @@ note: note.pdf bibliography.bib
 .PHONY: clean view purge note
 
 clean:
-	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi *.tdo
+	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi *.tdo *.fdb_latexmk *.fls *.toc
 
 purge: clean
 	-@rm -rf $(TARGETS)
