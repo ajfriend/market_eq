@@ -1,4 +1,4 @@
-TARGETS = main.pdf note.pdf
+TARGETS = market_eq.pdf
 
 all: $(TARGETS)
 
@@ -9,12 +9,12 @@ all: $(TARGETS)
 	pdflatex $*
 	make clean
 
-main.pdf: bibliography.bib
+market_eq.pdf: bibliography.bib
 
-note: note.pdf bibliography.bib
-	open note.pdf
+scratch: scratch.pdf bibliography.bib
+	open scratch.pdf
 
-.PHONY: clean view purge note
+.PHONY: clean view purge scratch
 
 clean:
 	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi *.tdo *.fdb_latexmk *.fls *.toc
