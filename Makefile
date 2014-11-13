@@ -11,10 +11,9 @@ all: $(TARGETS)
 
 market_eq.pdf: bibliography.bib
 
-scratch: scratch.pdf bibliography.bib
-	open scratch.pdf
+market_eq_long.pdf: bibliography.bib
 
-.PHONY: clean view purge scratch
+.PHONY: clean view purge
 
 clean:
 	-@rm -rf *.aux *.blg *.out *.bbl *.log *.dvi *.tdo *.fdb_latexmk *.fls *.toc
