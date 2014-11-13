@@ -293,3 +293,20 @@ write the abstract first. exploiting sparsity. splitting.
 AN APPLICATION IN THE THEORY OF GENERAL ECONOMIC EQUILIBRIUM
 - On Revealed Preference Analysis
 - On the uniqueness of equilibrium once again
+
+# Tue Oct 28 13:21:59 2014
+- problem, properties, 
+    - utilities
+- numerical methods
+    - cvxpy
+    - distributed
+- examples
+
+clarify how many problems, how many utilities
+
+problem, utilities, is it solvable.
+
+# Wed Oct 29 16:25:03 2014
+remember to check
+- <http://www.cs.berkeley.edu/~christos/agt11/notes/lect7.pdf>
+- <http://people.csail.mit.edu/costis/6853fa2011/6853-Lecture16.pdf>
