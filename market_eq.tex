@@ -704,8 +704,10 @@ On the other hand, if, at the given prices, he has $q_i = .03$, for instance, th
 
 Using the relative residual as a measure of convergence for our iterative ADMM
 algorithm only makes sense if we project a proposed solution onto positivity and
-global resource availability constraints. Otherwise, we could assign each agent an arbitrary 
+global resource availability constraints. Otherwise, we could assign each agent an arbitrarily large bundle of goods and acheive 0 dissatisfaction.
+Thus, in the experiements below, at each ADMM iterate, we will transform the iterate $x_i^k$ so that the assignments are positive, and their sum does not violate the global allocation constraint.
 
+In the experimental results given, we will plot both the worst-case nd average relative residual (both taken over all the agents in the market).
 
 \subsection{Centralized algorithm}
 To demonstrate the centralized algorithm of Section~\ref{sec:centralized},
