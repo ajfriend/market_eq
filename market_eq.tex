@@ -720,37 +720,34 @@ Figure~(\ref{f-cvxpy}) %todo fix
 plots the SCS solve time as a function of problem size, running
 SCS on its default parameters, with a stopping tolerance of $10^{-3}$,
 running on a 2013 macbook air, with 8 gb ram and a 1.7 GHz processor.
-The same figure also provides the average percent displeasure over the agents of the market.
+The same figure also provides the average and worst case relative residual over the agents of the market.
 
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=1.0\textwidth]{figures/cvxpy}
 \caption{XXX temporary figure. For different values of numbers of agents, $n$,
-we generate 10 random instances of a market, as in Section~\ref{sec:random_prob}. We solve each market problem with the centralized method, using SCS, and report the solve times and average and worst-case residuals, with the statistics taken over the agents in the market, not market instances. }
+we generate 10 random instances of a market, as in Section~\ref{sec:random_prob}. We solve each market problem with the centralized method, using SCS, and report the solve times and average and worst-case relative residuals, with the statistics taken over the agents in the market, not market instances.}
 \end{center}
-\label{f-admm}
+\label{f-cvxpy}
 \end{figure}
 
 
 \subsection{Decentralized algorithm}
-To demonstrate our decentralized algorithm of Section~\ref{sec:computation},
+To demonstrate our decentralized algorithm of Section~\ref{sec:distributed},
 %todo fix section ref
 we solve a single random instance of size $n=10^6$ agents.
-At each iteration, we take the consensus prices $\Phi^k$ and compute
-the average percent displeasure of the agents in the market at
-these prices (and allocations?) and report these figures
-in Figure~(3) %todo figure ref.
-
-
-
+At each iteration, we take the result of the prox operation (\ref{a-prox}) and the consensus prices $\Phi^k$ from (\ref{a-phibar}) and compute
+the average and worst-case relative residual over the agents in the market
+and record the findings
+in Figure~(\ref{f-admm}) %todo figure ref.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=0.6\textwidth]{figures/admm}
 \caption{XXX temporary figure. This figure gives results for decentralized ADMM algorithm applied to a single random market generated as in Section~\ref{sec:random_prob} with $n=10$ agents. We give the average and worst-case statistics of the agents for their relative residuals.}
 \end{center}
-\label{f-cvxpy}
+\label{f-admm}
 \end{figure}
 
 
