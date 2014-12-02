@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage{amssymb,amsmath}
+\usepackage{amssymb,amsmath,graphicx}
 \usepackage[small,bf]{caption}
 
 % add bib to ToC
@@ -8,7 +8,7 @@
 
 \input defs.tex
 
-\title{Computing market equilibria via convex optimization}
+\title{Computing Market Equilibria via Convex Optimization}
 \author{A.J. Friend \and Stephen Boyd}
 \date{\today}
 
@@ -36,6 +36,8 @@ and Internet advertising auctions.
 \newpage
 \tableofcontents
 \newpage
+
+XXX: where and how to highlight that these are exponential cone programs, and that this is something only recently efficiently solvable?
 
 \section{Introduction}
 We will consider exchange market equilibrium problems first introduced by
@@ -70,7 +72,7 @@ Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory, eisenberg1961ag
 This restricted case allows us to handle a larger family of utility functions
 with the convex framework.
 
-Our approach in this paper is to use the \emph{alternating direction method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm for solving convex formulations of the market equilibrium problem.
+In this paper, we provide two algorithmic approaches to the convex formulations of these market equilibrium problems. The first is to use recently developed exponential cone interior point solvers to provide a centralized algorithm. The second is to use the \emph{alternating direction method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm, allowing us to tackle huge problems.
 
 We provide examples and convergence results for large random markets, and 
 for application examples in economic policy, wireless spectrum management,
@@ -170,7 +172,7 @@ we will outline in Section~\ref{sec:computation}.
 % into exchange at times... best way to explain?
 
 
-\subsection{A special case: Fisher market}
+\subsection{Fisher market}
 % todo, where do we mention what functions we can handle?
 
 We will also consider the Fisher market, a special case of the exchange market, where agents have an initial amount of wealth (instead of an initial endowment of goods)
@@ -334,7 +336,7 @@ is concave.
 This utility is compatible with the Fisher problem~(\ref{p-fisher}), as it is homogeneous of degree 1.
 
 
-\subsection{Constant elasticity of substitution (CES)}
+\subsection{Constant elasticity of substitution}
 Constant elasticity of substitution (CES) functions have the form
 \[
 u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}.
@@ -389,7 +391,7 @@ The Leontief utility is not compatible with the exchange formulation,
 because the expression~(\ref{e-util-constraint}) is not concave.
 In fact, this utility allows for multiple disconnected equilibria in the exchange problem. %todo cite
 
-\subsection{Piecewise linear concave functions}
+\subsection{Piecewise linear concave}
 Piecewise linear concave functions generalize the Leontief utility, having the form
 \[
 u(x) = \min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0.
@@ -438,7 +440,7 @@ homogeneous, so they will not work with the Fisher framework.
 However, we see that 
 \begin{align*}
 \log(\nabla u(x)^T x) - \log(\nabla_j u(x)) =
-\log\left(\sum_{k=1}^n a_k - \frac{a_k b_k}{x_k+b_k} \right) - \log a_j + \log (x_j + b_j),
+\log\left(\sum_{k=1}^n a_k - \frac{a_k c_k}{x_k+c_k} \right) - \log a_j + \log (x_j + c_j),
 \end{align*}
 which is indeed concave, so the utilities are compatible
 with the exchange framework.
@@ -447,10 +449,26 @@ Again, we can transform a Fisher problem with these utilities into
 an exchange problem and use the exchange framework to solve
 the Fisher MEP.
 
-\section{Computation}
-\label{sec:computation}
-%todo introduce prox operators?
+\section{Algorithms}
+\subsection{Centralized conic programming algorithm}
+\label{sec:centralized}
+As the market equilibrium problems we have described are convex, one might expect that they could be easily formulated and solved with currently
+available modeling frameworks and optimization solvers.
+This is indeed the case, but only due to recent advances in convex solvers,
+such as SCS and ECOS-Exp. %todo cite
+For the first time, these solvers can handle exponential cone constraints,
+which are needed to represent the logarithm and exponential functions found in 
+formulations (\ref{p-exchange}) and (\ref{p-fisher}).
 
+We can describe these market equilibrium problems easily using the modeling
+framework CVXPY (XXX: cite), and solve the models using SCS. Section~\ref{sec:centralized} will give computational results for moderately sized problems. Indeed, these are the largest general market equilibrium problems we have seen solved in the literature. However, for much larger problems, we will
+be limited by solving these problems in a centralized fashion. The next section will describe distributed methods which will scale to arbitrarily large problems.
+
+
+\subsection{Distributed ADMM algorithm}
+\label{sec:distributed}
+
+%todo introduce prox operators?
 We can compute solutions to both the Fisher and exchange convex
 formulations, problems (\ref{p-fisher}) and (\ref{p-exchange}), using
 the alternating direction method of multipliers (ADMM) \cite{boyd2011distributed, parikh2013proximal}.
@@ -475,10 +493,10 @@ are the local log-prices, which must agree globally through the
 consensus variable $\Phi$.
 (In the Fisher formulation, $f_i$ will not depend on $\phi$.)
 
-We describe the $f_i$ functions in the next two subsections, and provide an
-ADMM implementation to solve the problems in the third section.
+In the remainder of this subsection, we describe the $f_i$ functions for the exchange and Fisher cases, and provide a general
+ADMM implementation to solve either case.
 
-\subsection{Fisher}
+\paragraph{Fisher}
 We can simply assign
 \[
 f_i(x_i, \phi) = -w_i \log u_i(x_i) + I_{\lbrace x \mid x \geq 0 \rbrace}(x_i),
@@ -487,7 +505,7 @@ where the second term is the indicator function for the positive orthant.
 We see that problem~(\ref{p-admm}) is equivalent to
 problem~(\ref{p-fisher}).
 
-\subsection{Exchange}
+\paragraph{Exchange}
 
 For agent $i$, let $f_i(x_i, \phi)$ be the indicator function for the
 constraints
@@ -500,10 +518,8 @@ x_i \geq 0.
 We see that problem~(\ref{p-admm}) is equivalent to problem~(\ref{p-exchange}).
 
 
-
-\subsection{ADMM algorithm}
-\paragraph{XXX: note}
-the admm algorithm in this section is written for the more general case of 
+\paragraph{Notation}
+XXX note: The admm algorithm in this section is written for the more general case of 
 the exchange problem, so it includes $\phi$ variables.
 The fisher problem doesn't involve $\phi$, so it may not really make sense
 to write a single algorithm for both settings. figure out later...
@@ -637,9 +653,107 @@ back to the individual agents for the next iteration.
 
 
 \section{Examples}
-\subsection{Random markets}
+\subsection{Random problem data generation}
+\label{sec:random_prob}
+We will generate random exchange market instances to test our algorithms.
+We describe the generation procedure here.
+The random markets in these tests will be parameterized
+by a single number, $n$, which will be both the
+number of agents and the number of goods in the market.
 
-\subsection{Applications}
+Each agent will have a utility function involving $r = \min(n,20)$
+goods.
+We choose this set of goods for each agent by randomly selecting
+$r$ distinct goods from the pool of $n$ possible goods.
+The utility function of the agent has an equal chance of 
+being either of the fractional power or logarithmic form.
+The parameters for the utility functions, $a_i$, $c_i$, and possibly
+$d_i$ will be drawn from a uniform distribution on $[0,1]$ for each good.
+Note that the fractional power and logarithmic utilities include
+linear, CES, and Cobb-Douglas utilities as special cases,
+so we consider this family of random utilities to be reasonably general.
+
+Each agent will also be endowed with nonzero amounts of $r$
+goods.
+The set of $r$ goods will again be drawn from the pool of $n$
+without replacement, and the initial endowment of
+the resulting goods will be drawn from a uniform distribution on
+$[0,1]$.
+
+To ensure that equilibrium prices are meaningful and non-trivial,
+we will assign the random subsets of goods for utility functions and
+initial endowments in such a way that every good is desired by at least one agent, and every good is provided by at least one agent.
+
+\subsection{Relative residuals}
+To evaluate our computational experiments, we propose a measure of
+the relative \emph{dissatisfaction} of an agent in a market, given
+market log-prices $\Phi$ and an algorithmically-prescribed bundle of goods
+$x$.
+That is, for any bundle of goods and proposed log-prices, we will compare the
+utility assigned to an agent via its assigned bundle with the maximum utility
+the agent could acheive by solving his UMP at the given prices.
+
+For agent $i$, with prescribed bundle $x_i$ and global log-prices $\Phi$,
+we define the relative residual to be
+\[
+q_i(x_i, \Phi)= \max\left(0,1-\frac{u_i(x_i^k)}{u_i(x_i^\star(\Phi^k))}\right).
+\]
+Note that $q_i \in [0,1]$ is a measure of the dissatisfaction of agent $i$.
+If the agent is assigned more utility (by violating his spending constraints) than he would get by solving his UMP, he has $q_i = 0$ dissatisfaction.
+On the other hand, if, at the given prices, he has $q_i = .03$, for instance, then he has only been assigned $97\%$ of his maximum possibe utility (at the given prices).
+
+Using the relative residual as a measure of convergence for our iterative ADMM
+algorithm only makes sense if we project a proposed solution onto positivity and
+global resource availability constraints. Otherwise, we could assign each agent an arbitrary 
+
+
+\subsection{Centralized algorithm}
+To demonstrate the centralized algorithm of Section~\ref{sec:centralized},
+%todo add SCS section, fix section reference
+we generate random exchange markets ranging in size
+from $n=10^1$ to $n=10^3$.
+For each problem size, we generate 10 market instances to demonstrate
+variance in solve time.
+Figure~(\ref{f-cvxpy}) %todo fix
+plots the SCS solve time as a function of problem size, running
+SCS on its default parameters, with a stopping tolerance of $10^{-3}$,
+running on a 2013 macbook air, with 8 gb ram and a 1.7 GHz processor.
+The same figure also provides the average percent displeasure over the agents of the market.
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=1.0\textwidth]{figures/cvxpy}
+\caption{XXX temporary figure. For different values of numbers of agents, $n$,
+we generate 10 random instances of a market, as in Section~\ref{sec:random_prob}. We solve each market problem with the centralized method, using SCS, and report the solve times and average and worst-case residuals, with the statistics taken over the agents in the market, not market instances. }
+\end{center}
+\label{f-admm}
+\end{figure}
+
+
+\subsection{Decentralized algorithm}
+To demonstrate our decentralized algorithm of Section~\ref{sec:computation},
+%todo fix section ref
+we solve a single random instance of size $n=10^6$ agents.
+At each iteration, we take the consensus prices $\Phi^k$ and compute
+the average percent displeasure of the agents in the market at
+these prices (and allocations?) and report these figures
+in Figure~(3) %todo figure ref.
+
+
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.6\textwidth]{figures/admm}
+\caption{XXX temporary figure. This figure gives results for decentralized ADMM algorithm applied to a single random market generated as in Section~\ref{sec:random_prob} with $n=10$ agents. We give the average and worst-case statistics of the agents for their relative residuals.}
+\end{center}
+\label{f-cvxpy}
+\end{figure}
+
+
+
+\section{Applications}
 \cite{shoven1992applying}
 
 see \cite{shoven1992applying} for examples and applications of nested CES functions
@@ -757,6 +871,7 @@ are indeed equilibrium allocations.
 
 
 \section{Other solution methods}
+XXX: some ideas to pursue in the future
 
 \subsection{Infinite LP/cutting plane methods}
 That WGS gives a cutting plane is proved in \cite{arrow1959stability}.

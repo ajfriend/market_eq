@@ -310,3 +310,47 @@ problem, utilities, is it solvable.
 remember to check
 - <http://www.cs.berkeley.edu/~christos/agt11/notes/lect7.pdf>
 - <http://people.csail.mit.edu/costis/6853fa2011/6853-Lecture16.pdf>
+
+# Sun Nov 23 16:43:28 2014
+- look at nesterov and socp paper
+- how does nesterov do the normal (unweighted) geo mean? 1/n case?
+
+log scale plot
+
+how to make problems, 10 random instances
+
+centralized alg
+distributed alg
+
+3 pages
+
+ecos/scs: n vs solve time
+
+iters and residual for distributed alg
+
+one problem for big.
+
+we check correctness.
+
+fig 2 (exactly two figures)
+to illustrate convergence of alg, solve problem instance of size 10^6.
+
+1 million users/ 1 millino goods, soak it in.
+data alone was 2gb to describe.
+
+average vs worst case residual. 
+
+each iteration required 4 minutes on kona64
+
+examples
+1.1 how to make random problems
+1.2 centralized
+1.3 decentralized
+
+maybe some dense ones in figure 1, combined with the sparse ones. (maybe separate plot)
+http://users.isy.liu.se/johanl/yalmip/pmwiki.php?n=Tutorials.NonlinearOperators
+http://users.isy.liu.se/johanl/yalmip/pmwiki.php?n=Tutorials.GraphRepresentations
+
+# Mon Dec  1 22:53:17 2014
+- make sure to note *why* the problem is hard, exponential cone
+- in the map-reduce step, make sure we handle division by zero correctly
