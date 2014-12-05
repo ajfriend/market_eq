@@ -375,3 +375,8 @@ http://users.isy.liu.se/johanl/yalmip/pmwiki.php?n=Tutorials.GraphRepresentation
 - recent updates: Algorithms for Equilibrium Prices in Linear Market Models
 Kurt Mehlhorn
 - will the algorithmic case of no prices (for fisher) be automatically taken care of? do we lose any algorithmic efficiency?
+- make sure consistent use of forall and \ldots
+- it is decided: use \S for section references `\S\ref{s-content}`
+- figures are done like `Figure~\ref{f-nopsfrag}`
+- equivalence when prices are nonzero, *sane* markets
+- for a justification of the equality, see appendix a
