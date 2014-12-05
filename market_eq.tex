@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage{amssymb,amsmath,graphicx}
+\usepackage{amssymb,amsmath,graphicx,url}
 \usepackage[small,bf]{caption}
 
 % add bib to ToC
@@ -26,18 +26,18 @@ finding equilibrium prices can be NP-hard.
 This paper will focus on the numerical computation
 of equilibria for a subset of markets whose equilibrium
 problem can be cast as a convex program.
-We introduce algorithms which scale to huge markets and can be computed
+Recent advances in exponential cone solvers allow us to solve these problems
+as conic programs.
+We will also introduce algorithms which scale to huge markets and can be computed
 in a distributed fashion.
-We report numerical results for large random markets and for
-application examples in economic policy, wireless spectrum management,
-and Internet advertising auctions.
+We report numerical results for huge random markets.
 \end{abstract}
 
 \newpage
 \tableofcontents
 \newpage
 
-XXX: where and how to highlight that these are exponential cone programs, and that this is something only recently efficiently solvable?
+%todo santiago's stuff
 
 \section{Introduction}
 We will consider exchange market equilibrium problems first introduced by
@@ -72,11 +72,9 @@ Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory, eisenberg1961ag
 This restricted case allows us to handle a larger family of utility functions
 with the convex framework.
 
-In this paper, we provide two algorithmic approaches to the convex formulations of these market equilibrium problems. The first is to use recently developed exponential cone interior point solvers to provide a centralized algorithm. The second is to use the \emph{alternating direction method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm, allowing us to tackle huge problems.
+In this paper, we provide two algorithmic approaches to the convex formulations of these market equilibrium problems. The first is to capitalize on recently developed exponential cone solvers \cite{scs} to provide a centralized algorithm, easily solved with a convex modeling language, such as \cite{cvxpy, cvx}. The second approach is to use the \emph{alternating direction method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm, allowing us to tackle huge problems.
 
-We provide examples and convergence results for large random markets, and 
-for application examples in economic policy, wireless spectrum management,
-and Internet advertising auctions.
+We provide examples and convergence results for large random markets.
 
 \section{Definitions}
 In this section, we give precise definitions for the market equilibrium problems that we will be studying. We define the exchange model,
@@ -86,7 +84,7 @@ start with some initial wealth, which they use to purchase goods
 from a globally available store.
 
 \subsection{Utility functions}
-The computational tractability of these problems will depend on the
+The computational tractability of these problems will depend on properties of the
 utility functions of the agents in the market.
 To classify these functions, we will need some simple definitions.
 
@@ -100,6 +98,7 @@ All the utility functions we consider in this paper will
 be concave and nondecreasing.
 
 \subsection{Exchange market}
+\label{sec:exchange_def}
 An \emph{exchange market} has $m$ agents and $n$ goods where
 agent $i$ has an initial endowment of goods $b_i \in \reals_+^n$.
 Agent $i$ achieves utility $u_i(x_i) \in \reals_+$ when he is is allocated a
@@ -153,7 +152,7 @@ The computational tractability of the exchange MEP
 (and the forthcoming Fisher MEP) depends on the utility functions of
 the agents in the market.
 For example, for general concave and increasing utility functions,
-the exchange MEP is NP-hard. %todo citation
+the exchange MEP is NP-hard \cite{codenotti2006leontief}.
 We will restrict our consideration in this paper to a subset of utility
 functions for which the exchange MEP can be modeled as a convex program.
 
@@ -168,13 +167,8 @@ The convex formulation given bin Section~\ref{sec:convex_form_exchange} will
 be the basis for the scalable algorithm for the exchange MEP, which
 we will outline in Section~\ref{sec:computation}.
 
-%convex framework is key, two different ones, but fisher can fit
-% into exchange at times... best way to explain?
-
 
 \subsection{Fisher market}
-% todo, where do we mention what functions we can handle?
-
 We will also consider the Fisher market, a special case of the exchange market, where agents have an initial amount of wealth (instead of an initial endowment of goods)
 to purchase goods from a store of some amount of globally available goods.
 
@@ -199,7 +193,7 @@ That is, agent $i$ solves the \emph{Fisher~UMP}
 We will again use $x^\star_i(p)$ to denote the demand relation
 for agent $i$, \ie, the set of solutions to the Fisher UMP~(\ref{p-fisher-ump}).
 
-The \emph{Fisher MEP} is then identical to (\ref{p-mep}), except that we use 
+The \emph{Fisher MEP} is then identical to problem (\ref{p-mep}), except that we use 
 the Fisher definitions for $x^\star_i(p)$ and $B$.
 
 \paragraph{Fisher is a special case of Arrow-Debreu}
@@ -236,6 +230,11 @@ While the convex models covered in Section~\ref{sec:convex_form} are different,
 they are sufficiently similar that they will both fall under the computational
 framework given in Section~\ref{sec:computation}.
 
+In summary, a Fisher market with compatible utility functions can be solved
+using the convex formulation in Section~\ref{sec:convex_form_exchange}.
+If the Fisher utilities are concave, nondecreasing, and homogeneous
+of degree 1, then we can use the Fisher formulation of Section~\ref{sec:convex_form_fisher}.
+
 
 \section{Convex optimization formulations}
 \label{sec:convex_form}
@@ -259,7 +258,7 @@ To obtain a convex program, we first apply some transformations to the
 problem.
 Specifically, let $p_j = \exp(\phi_j)$, and take the logarithm of
 the first set of constraints.
-
+We will refer to $\phi_j$ as the \emph{log-prices}.
 We obtain the optimization problem %todo fix typesetting
 \begin{equation}
 \label{p-exchange}
@@ -317,7 +316,8 @@ for Fisher, problem~(\ref{p-fisher}), and exchange markets, problem~(\ref{p-exch
 It will also
 be valuable to note how the expressions associated
 with the utility functions may be expressed in a disciplined
-convex programming framework \cite{grant2006disciplined}.
+convex programming framework \cite{GBY:06,Grant2004,cvx,cvxpy}.
+
 
 \subsection{Linear}
 
@@ -356,7 +356,7 @@ For the exchange formulation, some algebra shows that
 \end{align*}
 which is only concave when $0 < \rho \leq 1$.
 
-Codenotti and McCune \cite{codenotti2005marketCES} were able to provide a convex formulation which accommodated
+Although we won't conver it in this paper, Codenotti and McCune \cite{codenotti2005marketCES} were able to provide a convex formulation which accommodated
 CES functions with $-1 \leq \rho < 0$.
 
 \subsection{Cobb-Douglas}
@@ -751,27 +751,14 @@ in Figure~(\ref{f-admm}) %todo figure ref.
 \end{figure}
 
 
-
-\section{Applications}
-\cite{shoven1992applying}
-
-see \cite{shoven1992applying} for examples and applications of nested CES functions
-
-\begin{itemize}
-\item traffic
-\item routing
-\item spectrum management
-\item others?
-\end{itemize}
-
 \appendix
-
-
 
 
 \section{Convex formulation for exchange}
 \label{sec:exchange_proof}
-The primal Arrow-Debreu problem has the form
+In this section, we use the same definitions and notation as Section~(\ref{sec:exchange_def}).
+
+The exchange UMP~(\ref{p-ump}) for an individual agent has the form
 \[
 \begin{array}{ll}
 \mbox{minimize} & - u_i(x_i)\\
@@ -780,18 +767,24 @@ The primal Arrow-Debreu problem has the form
 \end{array}
 \]
 
-The dual problem has the form
+The dual of this problem is
 \[
 \begin{array}{ll}
 \mbox{maximize} & -(- u_i)^*(\tau_i - p y_i) - p^T b_i y_i\\
 \mbox{subject to} & y_i \geq 0\\
-& \tau_i \geq 0.
+& \tau_i \geq 0,
 \end{array}
 \]
+with $y_i \in \reals$ and $\tau_i \in \reals^n$.
 
-We can also write down the optimality conditions for the equilibrium allocation,
-which includes a global resource constraint.
 
+Optimality conditions for agent $i$'s UMP consist of primal feasibility, dual
+feasibility and zero duality gap \cite{BoV:04}.
+A solution to the exhcange MEP~(\ref{p-mep})
+is given by an allocation for each agent which satisfies that
+agent's UMP optimality condtions, such that the demand of the goods
+does not exceed the supply.
+Thus, we can write the exchange MEP optimality conditions as
 \begin{align*}
 -\nabla u_i(x_i) + p y_i &= \tau_i\\
 y_i p^T x_i &= y_i p^T b_i \\
@@ -867,117 +860,6 @@ This recovers all the original constraints.
 \label{sec:fisher_proof}
 We prove that solutions to the convex formulation %todo ref
 are indeed equilibrium allocations.
-
-
-\section{Other solution methods}
-XXX: some ideas to pursue in the future
-
-\subsection{Infinite LP/cutting plane methods}
-That WGS gives a cutting plane is proved in \cite{arrow1959stability}.
-(supposedly... check, as the papers have similar names.)
-
-\subsection{Tatonnement}
-
-\subsection{Weighted total utility}
-put in the fisher stuff here. arrow-debreu can be solved this way, but we
-don't know the weights. introduce re-weighting idea.
-
-\subsection{CVXPY and SCS}
-
-\subsection{Monotone operators}
-For many utility functions,
-%todo when?
-the excess demand function
-(or correspondence,
-or relation) of an agent is a
-monotone operator.
-That is,
-\begin{equation}
-\label{e-monotone}
-\left[z(p) - z(q) \right]^T \left[p - q\right] \leq 0.
-\end{equation}
-
-If we assume that Walras' Law holds, \ie, each agent spends their entire
-budget, or $p^T z(p) = p^T x(p) - p^T b = 0$, then the operator monotonicity has
-a nice economic interpretation in terms of \emph{preferences}.
-
-Expanding inequality~(\ref{e-monotone}) and applying Walras' Law, we find that
-\[
-p^T z(q) + q^T z(p) \geq 0.
-\]
-
-We thus see that the implication
-\begin{equation}
-\label{e-preference}
-p^T z(q) \leq 0 \implies q^T z(p) \geq 0
-\end{equation}
-is equivalent
-%todo or just implies? is it actually true that they are equivalent?
-to inequality~(\ref{e-monotone}) whenever Walras' Law holds.
-
-We interpret (\ref{e-preference}) as revealing that the agent prefers prices
-$p$ over prices $q$. If $p^T z(q) \leq 0$, then $p^T x(q) \leq p^T b$, implying
-that both bundles $x(p)$ and $x(q)$ are affordable (feasible) at prices $p$.
-Since $x(p)$ is an optimal bundle at prices $p$, we know that it must be at least
-as preferred at $x(q)$, or that $u(x(p)) \geq u(x(q))$.
-
-Inequality~(\ref{e-monotone}) already shows that implication~(\ref{e-preference})
-holds, but to interpret the result economically, suppose that the
-implication did not hold, \ie, that $q^T z(p) < 0$. We would then have that
-$q^T x(p) < q^T b$, which implies that $x(p)$ and $x(q)$ are both affordable
-bundles at at prices $q$. However, we know that $u(x(p)) \geq u(x(q))$, so
-bundle $x(p)$ must be optimal, and Walras' Law implies $q^T x(p) = q^T b$, which
-gives a contradiction. 
-
-In the case of strict inequality, if $p^T z(q) < 0$, then $q^T z(p) > 0$.
-That is, $x(p)$ is revealed as preferred to $x(q)$, and $x(p)$ is not within
-budget at prices $q$, so prices $p$ are preferred by the agent.
-
-Note that if each agent's excess demand function is a monotone operator, then
-the market's aggregate excess demand function is also monotone. If these
-operators are \emph{maximal} monotone, then we can use the this framework for
-solving these problems.
-%todo However, it is unclear if and when these operators are maximal.
-
-Even in the case that the operators are monotone but not maximal, we still get
-a cutting-plane by computing the demand function. That is, for any prices $p$
-and optimal prices $p^*$, we have that
-\[
-p^{*T} z(p) \geq 0,
-\]
-which gives us a cutting-plane in the price simplex.
-A cutting-plane algorithm can then be used to compute the optimal prices
-
-\paragraph{Computing the resolvent}
-The resolvent of the excess demand operator is
-\[
-(I + \lambda z)^{-1}(p) = q,
-\]
-which we parse to interpret as
-\[
-p = q + \lambda x(q) - \lambda b.
-\]
-That is, given prices $p$, we must find prices $q$ such that the agent's UMP
-at prices $q$ satisfy the above quality.
-
-XXX: We can write down the optimality conditions, but these may put the same
-constraints on the utility functions as the Ye formulation. We can always
-substitute $p = q + \lambda x(q)$ into the opt conditions to remove either
-$q$ or $x$. But we end up with a non-convex problem. We optimize over the a
-non-convex region, something like the space outside of a unit ball.
-We may also be able to formulate the problem as being bi-convex in $x$ and $q$,
-but I'm not sure how helpful that would be.
-
-\subsection{Cutting plane}
-\paragraph{Approximations?}
-can i approximate the exponential cone to do an approximate prox evaluation
-at each step, allowing for SOCP solvers that can't handle exponential cones?
-
-what if we approximate everything with a quadratic around the current iterate
-for an approximate projection? subset or superset of actual agent cutting set?
-does this simplification make updates with an analytic form, allowing for very
-fast iteration?
-
 
 
 \newpage

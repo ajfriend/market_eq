@@ -354,3 +354,24 @@ http://users.isy.liu.se/johanl/yalmip/pmwiki.php?n=Tutorials.GraphRepresentation
 # Mon Dec  1 22:53:17 2014
 - make sure to note *why* the problem is hard, exponential cone
 - in the map-reduce step, make sure we handle division by zero correctly
+
+# Tue Dec  2 16:40:20 2014
+## for applications look at
+- shoven  Available HB145 .S53 1992 green
+- Equilibrium theory and applications : proceedings of the Sixth International Symposium in Economic Theory and Econometrics   HB145 .I59 1989 green
+- look through my collected papers
+
+# Thu Dec  4 14:57:17 2014
+- how to consistently refer to the formulations for exchange and fisher? by equation? or by section? formulation or algorithm?
+- figure out how to reference secitions, write out section, or use section symbol?
+- what about the proofs? maybe just exchange? what about fisher?
+- CES context reference?
+- for fisher, add ref that any ___ function can be tranformed to homogeneous of deg 1
+- leonteif, add ref that you get disconnected equilibria
+- what to do with piecewise linear? combine with leonteif?
+- fractional power and log - given by ye to give context
+- for log and frac power, need better nomenclature for the types of formulations and algorithms we can use with fisher and exchange problems.
+- compare with GAMS?
+- recent updates: Algorithms for Equilibrium Prices in Linear Market Models
+Kurt Mehlhorn
+- will the algorithmic case of no prices (for fisher) be automatically taken care of? do we lose any algorithmic efficiency?
