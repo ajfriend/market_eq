@@ -40,6 +40,7 @@ We report numerical results for huge random markets.
 %todo santiago's stuff
 
 \section{Introduction}
+\subsection{Background}
 We will consider exchange market equilibrium problems first introduced by
 Walras in his in ``Elements of Pure Economics''
 \cite{walras1896elements}.
@@ -56,7 +57,7 @@ Walras suggested his natural \emph{tatonnement} price adjustment scheme as a mea
 However, the convergence of tatonnement and conditions for existence of equilibrium prices remained an open problems for many years.
 
 The Nobel Laureates Arrow and Debreu were the first to show that equilibrium
-prices exist under mild conditions on the utility functions of agents\cite{arrow1954existence}.
+prices exist under mild conditions on the utility functions of agents \cite{arrow1954existence}.
 However, these proofs relied on fixed-point theorems and were non-constructive.
 As such, they offered no practical means by which to compute these equilibria.
 
@@ -74,16 +75,34 @@ with the convex framework.
 
 In this paper, we provide two algorithmic approaches to the convex formulations of these market equilibrium problems. The first is to capitalize on recently developed exponential cone solvers \cite{scs} to provide a centralized algorithm, easily solved with a convex modeling language, such as \cite{cvxpy, cvx}. The second approach is to use the \emph{alternating direction method of multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and scalable algorithm, allowing us to tackle huge problems.
 
-We provide examples and convergence results for large random markets.
+\subsection{Outline}
+In \S\ref{sec:defs}, we define two different \emph{market equilibrium problems} (MEP) for the exchange and Fisher markets.
+The MEPs are defined by describing the \emph{utility maximization problems} (UMP) of the agents in these markets, and requiring that the solutions
+to the UMPs satisfy an equilibrium condition.
 
-\section{Definitions}
+In \S\ref{sec:convex_form}, we convert the exchange and Fisher MEPs into two different optimization \emph{formulations} which provide convex programs when the utility functions satisfy certain properties (\S\ref{sec:util_funcs}).
+
+An exchange MEP must always be solved using the exchange formulation. However,
+depending on the utility functions of the agents,
+Fisher MEPs can be solved using the Fisher formulation, or by converting to an exchange problem and using the exchange formulation.
+There are some Fisher MEPs which can only be solved using the exchange framework.
+
+Once we have used one of the two formulations to state an MEP as a convex optimization problem,
+we can write down the problem easily using a convex modeling language and solve it with an appropriate centralized solver (\S\ref{sec:centralized}). However, these methods will only scale up to medium-sized problems. For large scale problems, we will provide a distributed
+algorithm in \S\ref{sec:distributed}. Luckily, the two convex formulations are sufficiently similar that we can solve either with this single distributed algorithm.
+
+We provide examples and convergence results for large random markets in \S\ref{sec:examples}.
+
+
+\section{Problem definitions}
+\label{sec:defs}
 In this section, we give precise definitions for the market equilibrium problems that we will be studying. We define the exchange model,
 which deals with agents trading initial endowments of goods to maximize their own utility functions.
 A special case of the exchange model is Fisher model, where agents
 start with some initial wealth, which they use to purchase goods 
 from a globally available store.
 
-\subsection{Utility functions}
+\subsection{Utility function properties}
 The computational tractability of these problems will depend on properties of the
 utility functions of the agents in the market.
 To classify these functions, we will need some simple definitions.
@@ -145,6 +164,10 @@ We can write the exchange MEP as the feasibility problem
 where $B = \sum_{i=1}^m b_i$ is the vector giving the total amount of each good
 available for trade.
 
+In this paper, we will only consider markets where each good is \emph{desired} by at least one agent, and each good is \emph{provided} by at least one agent, by way of being included in that agent's initial endowment.
+These restrictions will allows us to exclude special cases requiring zero or infinite
+prices.
+
 
 \paragraph{Tractability}
 In general, however, the exchange MEP is not convex.
@@ -156,16 +179,16 @@ the exchange MEP is NP-hard \cite{codenotti2006leontief}.
 We will restrict our consideration in this paper to a subset of utility
 functions for which the exchange MEP can be modeled as a convex program.
 
-In Section~\ref{sec:convex_form_exchange}, the exchange MEP~(\ref{p-mep})
+In \S\ref{sec:convex_form_exchange}, the exchange MEP~(\ref{p-mep})
 is reformulated as a problem amenable to convex optimization.
 The convexity of the problem will depend on properties of the
 agents' utility functions.
 The admissible functions will include linear, constant elasticity
 of substitution (CES), Cobb-Douglas, and a few other utilities.
-A full description of these functions will be given in Section~\ref{sec:util_funcs}.
-The convex formulation given bin Section~\ref{sec:convex_form_exchange} will
-be the basis for the scalable algorithm for the exchange MEP, which
-we will outline in Section~\ref{sec:computation}.
+A full description of these functions will be given in \S\ref{sec:util_funcs}.
+The convex formulation given in \S\ref{sec:convex_form_exchange} will
+be the basis for the algorithms which
+we will outline in \S\ref{sec:algorithms}.
 
 
 \subsection{Fisher market}
@@ -196,6 +219,8 @@ for agent $i$, \ie, the set of solutions to the Fisher UMP~(\ref{p-fisher-ump}).
 The \emph{Fisher MEP} is then identical to problem (\ref{p-mep}), except that we use 
 the Fisher definitions for $x^\star_i(p)$ and $B$.
 
+%todo note that w = x^tp in this case.
+
 \paragraph{Fisher is a special case of Arrow-Debreu}
 We can cast any Fisher equilibrium problem as an exchange market problem using the following transformation.
 
@@ -211,29 +236,28 @@ total amount of goods in the market.
 
 \paragraph{Tractability}
 As the Fisher problem is a special case of the exchange problem,
-if the agents' utilities are compatible, we can use the convex model for the
-exchange problem
-to be given in Section~\ref{sec:convex_form_exchange} to solve
+if the agents' utilities are compatible in the sense given in \S\ref{sec:convex_form_exchange}, we can use the convex model for the
+exchange problem given in that section to solve
 the Fisher MEP.
 
 However, the Fisher problem will also admit a different
-convex model to be given in Section~\ref{sec:convex_form_fisher},
+convex model to be given in \S\ref{sec:convex_form_fisher},
 which will extend the class of compatible utility functions
 to those which are homogeneous of degree 1.
 In particular, the Fisher MEP with Leontief utility functions
 will be tractable as a convex problem, while the exchange MEP
 with Leonteif utilities is NP-hard.
 The compatible utility functions will be covered more completely
-in Section~\ref{sec:util_funcs}.
+in \S\ref{sec:util_funcs}.
 
-While the convex models covered in Section~\ref{sec:convex_form} are different,
+While the convex models covered in \S\ref{sec:convex_form} are different,
 they are sufficiently similar that they will both fall under the computational
-framework given in Section~\ref{sec:computation}.
+framework given in \S\ref{sec:computation}.
 
 In summary, a Fisher market with compatible utility functions can be solved
-using the convex formulation in Section~\ref{sec:convex_form_exchange}.
+using the convex formulation in \S\ref{sec:convex_form_exchange}.
 If the Fisher utilities are concave, nondecreasing, and homogeneous
-of degree 1, then we can use the Fisher formulation of Section~\ref{sec:convex_form_fisher}.
+of degree 1, then we can use the Fisher formulation of \S\ref{sec:convex_form_fisher}.
 
 
 \section{Convex optimization formulations}
@@ -386,26 +410,21 @@ For the exchange formulation, we have that
 which is indeed concave, so the utility is also compatible with
 problem~(\ref{p-exchange}).
 
-\subsection{Leontief}
-The Leontief utility has the form
-\[
-u(x) = \min_j a_j x_j,
-\]
-with $a_j \geq 0$ for each $j$. 
-
-This utility is compatible with the Fisher formulation, as it is homogeneous and concave.
-
-The Leontief utility is not compatible with the exchange formulation,
-because the expression~(\ref{e-util-constraint}) is not concave.
-In fact, this utility allows for multiple disconnected equilibria in the exchange problem. %todo cite
-
-\subsection{Piecewise linear concave}
-Piecewise linear concave functions generalize the Leontief utility, having the form
+\subsection{Piecewise-linear concave and Leontief}
+Piecewise-linear concave functions have the form
 \[
 u(x) = \min_k\lbrace a^{kT}x \rbrace,\quad a^k \geq 0.
 \]
-Just as with the Leonteif utility, they are compatible with the Fisher
-formulation, but not the exchange formulation.
+
+A special case, the Leontief utility,
+\[
+u(x) = \min_j a_j x_j,
+\]
+with $a_j \geq 0$ for each $j$,  comes from the economics literature. 
+
+These utilities iare compatible with the Fisher formulation, as they are homogeneous and concave.
+However, they are not compatible with the exchange formulation, as the expression~(\ref{e-util-constraint}) is not concave.
+In fact, the Leonteif utility admits multiple disconnected equilibria in the exchange problem and has been shown to be NP-hard \cite{codenotti2006leontief}.
 
 \subsection{Fractional power}
 The fractional power function
@@ -458,6 +477,7 @@ an exchange problem and use the exchange framework to solve
 the Fisher MEP.
 
 \section{Algorithms}
+\label{sec:algorithms}
 \subsection{Centralized conic programming algorithm}
 \label{sec:centralized}
 %todo make a note about exploiting sparsity
@@ -471,7 +491,7 @@ which are needed to represent the logarithm and exponential functions found in
 formulations (\ref{p-exchange}) and (\ref{p-fisher}).
 
 We can describe these market equilibrium problems easily using the modeling
-framework CVXPY (XXX: cite), and solve the models using SCS. Section~\ref{sec:centralized} will give computational results for moderately sized problems. Indeed, these are the largest general market equilibrium problems we have seen solved in the literature. However, for much larger problems, we will
+framework CVXPY (XXX: cite), and solve the models using SCS. \S\ref{sec:centralized} will give computational results for moderately sized problems. Indeed, these are the largest general market equilibrium problems we have seen solved in the literature. However, for much larger problems, we will
 be limited by solving these problems in a centralized fashion. The next section will describe distributed methods which will scale to arbitrarily large problems.
 
 
@@ -664,7 +684,8 @@ back to the individual agents for the next iteration.
 
 
 \section{Examples}
-\subsection{Random problem data generation}
+\label{sec:examples}
+\subsection{Problem data generation}
 \label{sec:random_prob}
 We will generate random exchange market instances to test our algorithms.
 We describe the generation procedure here.
@@ -721,7 +742,7 @@ Thus, in the experiements below, at each ADMM iterate, we will transform the ite
 In the experimental results given, we will plot both the worst-case nd average relative residual (both taken over all the agents in the market).
 
 \subsection{Centralized algorithm}
-To demonstrate the centralized algorithm of Section~\ref{sec:centralized},
+To demonstrate the centralized algorithm of \S\ref{sec:centralized},
 %todo add SCS section, fix section reference
 we generate random exchange markets ranging in size
 from $n=10^1$ to $n=10^3$.
@@ -739,13 +760,13 @@ The same figure also provides the average and worst case relative residual over 
 \includegraphics[width=1.0\textwidth]{figures/cvxpy}
 \end{center}
 \caption{XXX temporary figure. For different values of numbers of agents, $n$,
-we generate 10 random instances of a market, as in Section~\ref{sec:random_prob}. We solve each market problem with the centralized method, using SCS, and report the solve times and average and worst-case relative residuals, with the statistics taken over the agents in the market, not market instances.}
+we generate 10 random instances of a market, as in \S\ref{sec:random_prob}. We solve each market problem with the centralized method, using SCS, and report the solve times and average and worst-case relative residuals, with the statistics taken over the agents in the market, not market instances.}
 \label{f-cvxpy}
 \end{figure}
 
 
 \subsection{Decentralized algorithm}
-To demonstrate our decentralized algorithm of Section~\ref{sec:distributed},
+To demonstrate our decentralized algorithm of \S\ref{sec:distributed},
 %todo fix section ref
 we solve a single random instance of size $n=10^6$ agents.
 At each iteration, we take the result of the prox operation (\ref{a-prox}) and the consensus prices $\Phi^k$ from (\ref{a-phibar}) and compute
@@ -757,9 +778,12 @@ in Figure~(\ref{f-admm}) %todo figure ref.
 \begin{center}
 \includegraphics[width=0.6\textwidth]{figures/admm}
 \end{center}
-\caption{XXX temporary figure. This figure gives results for decentralized ADMM algorithm applied to a single random market generated as in Section~\ref{sec:random_prob} with $n=10$ agents. We give the average and worst-case statistics of the agents for their relative residuals.}
+\caption{XXX temporary figure. This figure gives results for decentralized ADMM algorithm applied to a single random market generated as in \S\ref{sec:random_prob} with $n=10$ agents. We give the average and worst-case statistics of the agents for their relative residuals.}
 \label{f-admm}
 \end{figure}
+
+\section{Conclusion}
+we have defined a problem widely studied in the economics literature, and showed how it can be solve easily using recently developed convex solvers and modeling languages, and that huge instances of the problem can be solved in a distributed fashion.
 
 
 \appendix

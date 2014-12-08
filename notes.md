@@ -380,3 +380,10 @@ Kurt Mehlhorn
 - figures are done like `Figure~\ref{f-nopsfrag}`
 - equivalence when prices are nonzero, *sane* markets
 - for a justification of the equality, see appendix a
+- periods at the ends of paragraph tags
+- "we will refer to these as the fisher formulation and the exchange formulation, respectively." note that an exchange problem must be solved using the exchange formulation, but a fisher problem may be solved by either formulation, depending on the utility functions, by transforming it into an exchange problem.
+
+we will introduce the individual problem of agents, the equilibrium problem of brining the agents' demands in line with supply, by defining these problems mathematically, we will then give various *formulations* to solve these problems.
+we will define both fisher and exhcange problems,
+
+then we give some computational frameworks for computing solutions to these convex problems, and provide examples.
