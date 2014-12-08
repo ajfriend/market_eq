@@ -81,15 +81,17 @@ The MEPs are defined by describing the \emph{utility maximization problems} (UMP
 to the UMPs satisfy an equilibrium condition.
 
 In \S\ref{sec:convex_form}, we convert the exchange and Fisher MEPs into two different optimization \emph{formulations} which provide convex programs when the utility functions satisfy certain properties (\S\ref{sec:util_funcs}).
+We will refer to these specifically as the exchange and Fisher \emph{formulations} to emphasize that a single \emph{problem} may be solvable
+using either \emph{formulation}.
 
 An exchange MEP must always be solved using the exchange formulation. However,
 depending on the utility functions of the agents,
 Fisher MEPs can be solved using the Fisher formulation, or by converting to an exchange problem and using the exchange formulation.
-There are some Fisher MEPs which can only be solved using the exchange framework.
+There are some Fisher MEPs which can only be solved using the exchange formulation.
 
 Once we have used one of the two formulations to state an MEP as a convex optimization problem,
 we can write down the problem easily using a convex modeling language and solve it with an appropriate centralized solver (\S\ref{sec:centralized}). However, these methods will only scale up to medium-sized problems. For large scale problems, we will provide a distributed
-algorithm in \S\ref{sec:distributed}. Luckily, the two convex formulations are sufficiently similar that we can solve either with this single distributed algorithm.
+algorithm in \S\ref{sec:distributed}. Luckily, the two convex formulations are sufficiently similar that we can solve either one with this single distributed algorithm.
 
 We provide examples and convergence results for large random markets in \S\ref{sec:examples}.
 
@@ -103,9 +105,9 @@ start with some initial wealth, which they use to purchase goods
 from a globally available store.
 
 \subsection{Utility function properties}
-The computational tractability of these problems will depend on properties of the
+The convexity of the resulting optimization problems will depend on properties of the
 utility functions of the agents in the market.
-To classify these functions, we will need some simple definitions.
+To classify these functions, we state some simple definitions.
 
 A function $u: \reals^n_+ \to \reals_+$ is \emph{homothetic} if for any $\alpha > 0$ we have that $u(x) \geq u(y)$ if and only if
 $u(\alpha x) \geq u(\alpha y)$.
@@ -212,6 +214,7 @@ That is, agent $i$ solves the \emph{Fisher~UMP}
 & x_i \geq 0.
 \end{array}
 \end{equation}
+Note that the only difference between problem (\ref{p-ump}) and (\ref{p-fisher-ump}) is that we have replaced $p^T b_i$ with $w_i$.
 
 We will again use $x^\star_i(p)$ to denote the demand relation
 for agent $i$, \ie, the set of solutions to the Fisher UMP~(\ref{p-fisher-ump}).
@@ -219,7 +222,6 @@ for agent $i$, \ie, the set of solutions to the Fisher UMP~(\ref{p-fisher-ump}).
 The \emph{Fisher MEP} is then identical to problem (\ref{p-mep}), except that we use 
 the Fisher definitions for $x^\star_i(p)$ and $B$.
 
-%todo note that w = x^tp in this case.
 
 \paragraph{Fisher is a special case of Arrow-Debreu}
 We can cast any Fisher equilibrium problem as an exchange market problem using the following transformation.
@@ -236,25 +238,21 @@ total amount of goods in the market.
 
 \paragraph{Tractability}
 As the Fisher problem is a special case of the exchange problem,
-if the agents' utilities are compatible in the sense given in \S\ref{sec:convex_form_exchange}, we can use the convex model for the
-exchange problem given in that section to solve
-the Fisher MEP.
+if the agents' utilities are compatible with the exchange formulation to be given in \S\ref{sec:convex_form_exchange} we can transform the Fisher MEP
+to the corresponding exchange problem to be solved using that formulation.
 
 However, the Fisher problem will also admit a different
-convex model to be given in \S\ref{sec:convex_form_fisher},
+convex model (to be given in \S\ref{sec:convex_form_fisher})
 which will extend the class of compatible utility functions
 to those which are homogeneous of degree 1.
+%todo reference for extension to homothetic
 In particular, the Fisher MEP with Leontief utility functions
 will be tractable as a convex problem, while the exchange MEP
 with Leonteif utilities is NP-hard.
 The compatible utility functions will be covered more completely
 in \S\ref{sec:util_funcs}.
 
-While the convex models covered in \S\ref{sec:convex_form} are different,
-they are sufficiently similar that they will both fall under the computational
-framework given in \S\ref{sec:computation}.
-
-In summary, a Fisher market with compatible utility functions can be solved
+Summarizing, a Fisher market with compatible utility functions can be solved
 using the convex formulation in \S\ref{sec:convex_form_exchange}.
 If the Fisher utilities are concave, nondecreasing, and homogeneous
 of degree 1, then we can use the Fisher formulation of \S\ref{sec:convex_form_fisher}.
@@ -262,16 +260,15 @@ of degree 1, then we can use the Fisher formulation of \S\ref{sec:convex_form_fi
 
 \section{Convex optimization formulations}
 \label{sec:convex_form}
-In this section, we cover the convex formulations which can be used to solve
-the Fisher and exchange market equilibrium problems.
+In this section, we cover the convex formulations which can be used to cast
+the Fisher and exchange market equilibrium problems as convex programs.
 
 \subsection{Exchange}
 \label{sec:convex_form_exchange}
 
-%todo equivalent when you have nonzero prices
-
-Following the formulations given in \cite{jain2007polynomial, chen2007note, nenakov1983algorithm}, it can be shown that the optimality conditions for 
-the exchange MEP are equivalent to the conditions
+To avoid cases where we must consider prices which are zero or infinite, throughout this paper, we will only consider markets where each good is desired by at least one agent, and each good is provided by at least one agent.
+Under this assumption, we can follow the formulations given in \cite{jain2007polynomial, chen2007note, nenakov1983algorithm}, which show that the optimality conditions for 
+the exchange MEP (\ref{p-mep}) are equivalent to the conditions
 \begin{equation}
 \begin{array}{ll}
 & \nabla u_i(x_i)^T x_i \geq  \nabla_j u_i(x_i) \sum_k b_{ik} \frac{p_k}{p_j}\\
@@ -283,14 +280,13 @@ the exchange MEP are equivalent to the conditions
 for all indices $i=1,\ldots,m,\ j=1,\ldots,n$.
 For a proof of this equivalence, see Appendix~\ref{sec:exchange_proof}.
 
-To obtain a convex program, we first apply some transformations to the
+Problem (\ref{p-exchange-gp}) is not yet in the best form to admit useful convex programs, so we will apply some transformations to the
 problem.
 Specifically, let $p_j = \exp(\phi_j)$, and take the logarithm of
 the first set of constraints.
 We will refer to $\phi$ as the \emph{log-prices}.
 
-The exchange MEP~(\ref{p-mep})
-is equivalent to the optimization problem
+We obtain the equivalent optimization problem
 \begin{equation}
 \label{p-exchange}
 \begin{array}{ll}
@@ -301,7 +297,7 @@ is equivalent to the optimization problem
 & x_{ij} \geq 0,
 \end{array}
 \end{equation}
-where the indices are again taken over all $i$ and $j$.
+where the indices are again taken over all $i=1,\ldots,m,\ j=1,\ldots,n$.
 
 Note that the optimization problem is convex if all the utility functions
 in the market are such that the term
@@ -310,6 +306,7 @@ in the market are such that the term
 \log(\nabla u_i(x_i)^T x_i) - \log(\nabla_j u_i(x_i))
 \end{equation}
 is concave for all $i$ and $j$.
+We will refer to (\ref{p-exchange}) as the \emph{exchange formulation}.
 
 Note that the first constraint in (\ref{p-exchange}) only needs to be explicitly formed when
 $\nabla_j u_i(x_i) > 0$; this derivative will be zero, for example, if an agent has no interest in good $j$. Similarly, we only need to include terms in the sum inside
@@ -321,7 +318,7 @@ problems efficiently.
 \label{sec:convex_form_fisher}
 
 When the utility functions are concave and homogeneous of degree 1,
-the Fisher MEP is solved by the convex program
+the Fisher MEP can by solved by the convex program
 \begin{equation}
 \label{p-fisher}
 \begin{array}{ll}
@@ -331,7 +328,7 @@ the Fisher MEP is solved by the convex program
 \end{array}
 \end{equation}
 originally given by \cite{eisenberg1959consensus, gale1960theory, eisenberg1961aggregation}.
-For a proof, see Appendix~\ref{sec:fisher_proof} or \cite[\S~6.2]{nisan2007algorithmic}.
+For a proof, see \cite[\S6.2]{nisan2007algorithmic}. We will refer to (\ref{p-fisher}) as the \emph{Fisher formulation}.
 
 The objective in this convex program is sometimes referred to as a \emph{weighted aggregate utility}, where the weights are given by the amount
 of wealth $w_i$ possessed by agent $i$.
@@ -344,7 +341,7 @@ The equilibrium prices can be recovered as dual variables.
 
 In this section, we'll describe various families of utility functions
 and state whether they fit into the convex programming frameworks
-for Fisher, problem~(\ref{p-fisher}), and exchange markets, problem~(\ref{p-exchange}). 
+for the exchange (\ref{p-exchange}) or Fisher (\ref{p-fisher}) formulations.
 It will also
 be valuable to note how the expressions associated
 with the utility functions may be expressed in a disciplined
@@ -373,7 +370,7 @@ Constant elasticity of substitution (CES) functions have the form
 \[
 u(x) = \left(\sum_{j=1}^n a_j x_j^\rho \right)^{1/\rho}.
 \]
-For $-\infty < \rho \leq 1, \rho \neq 0$, the demand is a concave and
+For $-\infty < \rho \leq 1, \rho \neq 0$, the utility is a concave and
 increasing function.
 
 It is useful to note that when $\rho = 1$, we have the linear utility function. As $\rho$ approaches $0$ and $-\infty$ we recover the Cobb-Douglas and Leonteif
@@ -388,7 +385,7 @@ For the exchange formulation, some algebra shows that
 \end{align*}
 which is only concave when $0 < \rho \leq 1$.
 
-Although we won't conver it in this paper, Codenotti and McCune \cite{codenotti2005marketCES} were able to provide a convex formulation which accommodated
+Although we won't cover it in this paper, Codenotti and McCune \cite{codenotti2005marketCES} were able to provide a convex formulation which accommodated
 CES functions with $-1 \leq \rho < 0$.
 
 \subsection{Cobb-Douglas}
@@ -408,7 +405,7 @@ For the exchange formulation, we have that
 \log x_j - \log a_j,
 \end{align*}
 which is indeed concave, so the utility is also compatible with
-problem~(\ref{p-exchange}).
+formulation~(\ref{p-exchange}).
 
 \subsection{Piecewise-linear concave and Leontief}
 Piecewise-linear concave functions have the form
@@ -422,7 +419,7 @@ u(x) = \min_j a_j x_j,
 \]
 with $a_j \geq 0$ for each $j$,  comes from the economics literature. 
 
-These utilities iare compatible with the Fisher formulation, as they are homogeneous and concave.
+These utilities are compatible with the Fisher formulation, as they are homogeneous and concave.
 However, they are not compatible with the exchange formulation, as the expression~(\ref{e-util-constraint}) is not concave.
 In fact, the Leonteif utility admits multiple disconnected equilibria in the exchange problem and has been shown to be NP-hard \cite{codenotti2006leontief}.
 
@@ -441,19 +438,19 @@ they are not compatible with the Fisher formulation.
 However, rather surprisingly, even though the
 functions are not homogeneous or homothetic, they are
 convex and are compatible with the exchange framework.
-We see that
+We have that
 \begin{align*}
 \log(\nabla u(x)^T x) - \log(\nabla_j u(x))
 &= \log\left(\sum_{k=1}^n a_k d_k (x_k+c_k)^{d_k} - \frac{a_k d_k c_k}{(x_k + c_k)^{1-d_k}} \right)\\
 &\quad- \log(a_j d_j) + (1-d_j)\log (x_j + c_j),
 \end{align*}
-which is seen to be concave, so this utility is compatible with
+which is indeed concave, so this utility is compatible with
 the exchange framework.
 
 Note that a Fisher MEP with these utilities cannot
 be solved with the Fisher framework~(\ref{p-fisher}),
 but it can be solved by converting the
-problem to the exchange form and using the exchange program~(\ref{p-exchange}).
+Fisher problem to an exchange MEP and using the exchange framework~(\ref{p-exchange}) to express it as a convex problem.
 
 
 \subsection{Logarithmic}
@@ -477,21 +474,26 @@ an exchange problem and use the exchange framework to solve
 the Fisher MEP.
 
 \section{Algorithms}
+Having defined the exchange and Fisher market equilibrium problems and seen how they can be represented as convex programs using one of two formulations,
+we will now present two algorithms to solve the resulting convex problems.
+The first is centralized, and will allow us to easily express and solve small- and medium-sized market problems.
+The second is distributed, and will allow us to solve huge market instances.
+
 \label{sec:algorithms}
 \subsection{Centralized conic programming algorithm}
 \label{sec:centralized}
 %todo make a note about exploiting sparsity
 
-As the market equilibrium problems we have described are convex, one might expect that they could be easily formulated and solved with currently
+As the market equilibrium problems given by (\ref{p-exchange}) and (\ref{p-fisher}) are convex, one might expect that they could be easily formulated and solved with currently
 available modeling frameworks and optimization solvers.
 This is indeed the case, but only due to recent advances in convex solvers,
-such as SCS and ECOS-Exp. %todo cite
+such as with SCS \cite{scs} and ECOS-Exp. %todo cite
 For the first time, these solvers can handle exponential cone constraints,
 which are needed to represent the logarithm and exponential functions found in 
 formulations (\ref{p-exchange}) and (\ref{p-fisher}).
 
 We can describe these market equilibrium problems easily using the modeling
-framework CVXPY (XXX: cite), and solve the models using SCS. \S\ref{sec:centralized} will give computational results for moderately sized problems. Indeed, these are the largest general market equilibrium problems we have seen solved in the literature. However, for much larger problems, we will
+framework CVXPY \cite{cvxpy}, and solve the models using SCS. \S\ref{sec:centralized_examples} will give computational results for moderately sized problems. Indeed, these are the largest general market equilibrium problems we have seen solved in the literature. However, for much larger problems, we will
 be limited by solving these problems in a centralized fashion. The next section will describe distributed methods which will scale to arbitrarily large problems.
 
 
@@ -519,20 +521,21 @@ $B$ is given.
 In the exchange problem, $B = \sum_i b_i$.
 The variables $x_i$ give the local allocations for agent $i$, and
 $\phi_i \in \reals^n_{++}$
-are the local log-prices, which must agree globally through the
+are the local log-prices, which must agree globally through the newly introduced
 consensus variable $\Phi$.
 (In the Fisher formulation, $f_i$ will not depend on $\phi$.)
 
-In the remainder of this subsection, we describe the $f_i$ functions for the exchange and Fisher cases, and provide a general
-ADMM implementation to solve either case.
+In the remainder of this subsection, we describe the $f_i$ functions for the exchange and Fisher formulations, and provide a general
+ADMM implementation which solves both cases.
 
 \paragraph{Fisher}
 We can simply assign
 \[
 f_i(x_i, \phi) = -w_i \log u_i(x_i) + I_{\lbrace x \mid x \geq 0 \rbrace}(x_i),
 \]
+for each agent $i$,
 where the second term is the indicator function for the positive orthant.
-We see that problem~(\ref{p-admm}) is equivalent to
+With this definition, problem~(\ref{p-admm}) is equivalent to
 problem~(\ref{p-fisher}).
 
 \paragraph{Exchange}
@@ -546,22 +549,17 @@ x_i \geq 0,
 \end{array}
 \]
 for all $j=1,\ldots,n$.
-We see that problem~(\ref{p-admm}) is equivalent to problem~(\ref{p-exchange}).
+With this definition, problem~(\ref{p-admm}) is equivalent to problem~(\ref{p-exchange}).
 
 
 \paragraph{Notation}
-XXX note: The admm algorithm in this section is written for the more general case of 
-the exchange problem, so it includes $\phi$ variables.
-The fisher problem doesn't involve $\phi$, so it may not really make sense
-to write a single algorithm for both settings. figure out later...
-
 We can use an ADMM-based splitting method \cite{boyd2011distributed} to
-solve the market equilibrium problem written in the form of
+solve either an exchange or Fisher market equilibrium problem written in the form of
 problem~(\ref{p-admm}).
 We will be interested in exploiting sparsity in the market, such
 as each agent only being interested buying and selling a small subset 
 of all the possible goods.
-For this purpose, we will use an indexing notation in this section which is
+For this purpose, we will introduce an indexing notation in this section which is
 more suitable to represent this sparsity and will simplify our resulting
 ADMM equations.
 
@@ -601,50 +599,52 @@ write $G^{-1}_g$ to denote the set of agents which are interested in
 purchasing good $g$.
 Similarly, $H^{-1}_g$ is the set of agents initially endowed with some
 positive amount of good $g$.
-
-In the ADMM algorithm, each agent will have a local opinion for the prices
-of the goods he is interested in purchasing or selling.
-We represent his local log-prices
-by $\phi_i \in \reals_+^{|G_i \cup H_i|}$.
-
 Note that
 \[
 \bigcup_{i=1}^n G_i = \bigcup_{i=1}^n H_i = \mathcal{G}.
 \]
 
+In the ADMM algorithm, agent $i$ will have a local opinion for the prices
+of the goods he is interested in purchasing or selling.
+We represent his local log-prices
+by $\phi_i \in \reals_+^{|G_i \cup H_i|}$.
+
+
+
 For any variable $z \in \reals^{|\mathcal{G}|}$ which contains values for
 each good in the market, we may write $z_{G_i}$ to represent the subvector
 of $z$ whose elements correspond to the goods in $G_i$.
 
-\paragraph{ADMM problem form} Then the problem we'd like to solve is given by
-problem (\ref{p-admm}), but we'll rewrite it here using this section's notation.
+\paragraph{ADMM problem form} The problem we'd like to solve is given by  (\ref{p-admm}), but we'll rewrite it here using our new notation, which
+takes into account that each agent will be interested in a different subset of goods.
 We will also replace the inequality constraint on purchased goods with an
 equality, since this simplifies the ADMM iteration, and we know that
-the constraint is tight at equilibrium.
+the constraint is tight at equilibrium (see \S\ref{sec:exchange_proof}).
 The reformulated problem is
-\[
+\begin{equation}
 \begin{array}{ll}
 \mbox{minimize} & \sum_i f_i(x_i, \phi_i) \\
 \mbox{subject to} & \sum\limits_{i \in G^{-1}_g} x_{ig} = B_g,\quad \forall g \in \mathcal{G}\\
 & \phi_{ig} = \Phi_g,\quad \forall i \in G^{-1}_g \cup H^{-1}_g,\ \forall g \in \mathcal{G}.
 \end{array}
-\]
+\label{p-admm2}
+\end{equation}
 
 The first set of constraints are the global resource constraints; the amount of
-goods purchased by agents cannot exceed the total initial endowed amount.
+goods purchased by agents must equal the total initial endowed amount.
 The second set of constraints are consensus constraints on the price variables,
 $\phi_i$.
 Each agent will have an opinion on the price of a good if he is buying or selling it.
 The constraint says that all agents with an opinion, $\phi_{ig}$, on the price
 of good $g$ must agree.
-They agree through a global consensus variable $\Phi$.
+They agree through a global consensus variable $\Phi_g$.
 
 
 \paragraph{ADMM algorithm}
-Note that we have a generalized consensus problem in the price variables,
+Using the nomenclature given in \cite{boyd2011distributed}, problem (\ref{p-admm2}) is a generalized consensus problem in the price variables,
 $\phi$, and a generalized sharing problem in the allocation variables, $x$.
 
-The resulting ADMM algorithm is 
+The iterates of the resulting ADMM algorithm are given by
 \begin{align}
 \label{a-xtild}
 \tilde{x}^k_g &:= \frac{1}{|G^{-1}_g|} \left( \sum_{i \in G^{-1}_g} x^k_{ig} - \sum_{i \in H^{-1}_g} b_{ig}\right)\\
@@ -666,21 +666,19 @@ opinions $\phi^k_g$ over all agents with an interest in the price of good $g$.
 Dual variables $u^k$ and $w^k_i$ are updated in the next two equations.
 Note that $\tilde{x}^k$, $\bar{\phi}^k$, and $u^k$ are \emph{global} variables
 and that $w_i^k$, $x_i^{k+1}$, and $\phi_i^{k+1}$ are \emph{local} variables
-for each agent. In equation~(\ref{a-prox}), each agent computes the projection
-onto his local optimality constraints.
+for each agent.
+In equation~(\ref{a-prox}), each agent evaluates the proximal operator
+related to his local function $f_i$.
 The input to this proximal operator is formed by combining
 local and global variables.
 For example, since $\tilde{x}^k$ is a global variable with values for each good in the market, we use the notation $\tilde{x}^k_{G_i}$ to denote the subset of this vector corresponding to goods in $G_i$.
 Each agent emits the results of their proximal operator and the
 global computation of $\tilde{x}^{k+1}_g$ and $\bar{\phi}^{k+1}_g$ continues in the next step.
 
-The algorithm above is decentralized and parallelizable.
-Each agent can compute their prox operator separately and in parallel.
-The results of these prox operators are aggregated, averaged, and then distributed
+The algorithm above is distributed and parallelizable.
+Each agent can compute their proximal operator separately and in parallel.
+The results of these proximal operators are aggregated, averaged, and then distributed
 back to the individual agents for the next iteration.
-
-
-
 
 
 \section{Examples}
@@ -712,36 +710,37 @@ without replacement, and the initial endowment of
 the resulting goods will be drawn from a uniform distribution on
 $[0,1]$.
 
-To ensure that equilibrium prices are meaningful and non-trivial,
+To ensure that equilibrium prices are meaningful,
 we will assign the random subsets of goods for utility functions and
 initial endowments in such a way that every good is desired by at least one agent, and every good is provided by at least one agent.
 
 \subsection{Relative residuals}
 To evaluate our computational experiments, we propose a measure of
-the relative \emph{dissatisfaction} of an agent in a market, given
-market log-prices $\Phi$ and an algorithmically-prescribed bundle of goods
-$x$.
+the relative \emph{dissatisfaction} of an agent in a market, for when the agent is given a proposition for log-prices $\Phi$ and an bundle of goods
+$x_i$.
 That is, for any bundle of goods and proposed log-prices, we will compare the
-utility assigned to an agent via its assigned bundle with the maximum utility
-the agent could acheive by solving his UMP at the given prices.
+utility assigned to an agent via its assigned bundle, $x_i$, with the maximum utility
+the agent could achieve by solving his UMP at the given prices $\Phi$.
 
 For agent $i$, with prescribed bundle $x_i$ and global log-prices $\Phi$,
-we define the relative residual to be
+we define the \emph{relative residual} to be
 \[
 q_i(x_i, \Phi)= \max\left(0,1-\frac{u_i(x_i^k)}{u_i(x_i^\star(\Phi^k))}\right).
 \]
 Note that $q_i \in [0,1]$ is a measure of the dissatisfaction of agent $i$.
 If the agent is assigned more utility (by violating his spending constraints) than he would get by solving his UMP, he has $q_i = 0$ dissatisfaction.
-On the other hand, if, at the given prices, he has $q_i = .03$, for instance, then he has only been assigned $97\%$ of his maximum possibe utility (at the given prices).
+On the other hand, if, for instance, he has $q_i = .03$, then he has only been assigned $97\%$ of his maximum possible utility at the given prices.
 
 Using the relative residual as a measure of convergence for our iterative ADMM
-algorithm only makes sense if we project a proposed solution onto positivity and
-global resource availability constraints. Otherwise, we could assign each agent an arbitrarily large bundle of goods and acheive 0 dissatisfaction.
-Thus, in the experiements below, at each ADMM iterate, we will transform the iterate $x_i^k$ so that the assignments are positive, and their sum does not violate the global allocation constraint.
+algorithm only makes sense if we project a proposed solution onto positivity of $x_i$ and
+global resource availability constraints.
+Otherwise, we could assign each agent an arbitrarily large bundle of goods and achieve 0 dissatisfaction.
+Thus, in the experiments below, we will transform the proposed bundles $x_i$ so that the assignments are positive, and their sum does not violate the global allocation constraint.
 
-In the experimental results given, we will plot both the worst-case nd average relative residual (both taken over all the agents in the market).
+In the experimental results given, we will plot both the worst-case and average relative residual (both taken over all the agents in the market).
 
 \subsection{Centralized algorithm}
+\label{sec:centralized_examples}
 To demonstrate the centralized algorithm of \S\ref{sec:centralized},
 %todo add SCS section, fix section reference
 we generate random exchange markets ranging in size
@@ -751,7 +750,7 @@ variance in solve time.
 Figure~\ref{f-cvxpy}
 plots the SCS solve time as a function of problem size, running
 SCS on its default parameters, with a stopping tolerance of $10^{-3}$,
-running on a 2013 macbook air, with 8 gb ram and a 1.7 GHz processor.
+running on a 2013 Macbook Air, with 8 gb ram and a 1.7 GHz processor.
 The same figure also provides the average and worst case relative residual over the agents of the market.
 
 
@@ -772,7 +771,7 @@ we solve a single random instance of size $n=10^6$ agents.
 At each iteration, we take the result of the prox operation (\ref{a-prox}) and the consensus prices $\Phi^k$ from (\ref{a-phibar}) and compute
 the average and worst-case relative residual over the agents in the market
 and record the findings
-in Figure~(\ref{f-admm}) %todo figure ref.
+in Figure~\ref{f-admm}.
 
 \begin{figure}
 \begin{center}
@@ -782,14 +781,11 @@ in Figure~(\ref{f-admm}) %todo figure ref.
 \label{f-admm}
 \end{figure}
 
-\section{Conclusion}
-we have defined a problem widely studied in the economics literature, and showed how it can be solve easily using recently developed convex solvers and modeling languages, and that huge instances of the problem can be solved in a distributed fashion.
-
 
 \appendix
 
 
-\section{Convex optimality conditions for exchange MEP}
+\section{Convex optimality conditions for exchange problem}
 \label{sec:exchange_proof}
 In this section, we use the same definitions and notation as in \S\ref{sec:exchange_def}.
 Consult \cite{BoV:04} as a reference for any unfamiliar terms in this section.
@@ -816,9 +812,9 @@ is the convex conjugate of the negative utility $-u_i$.
 
 The Karush-Khun-Tucker (KKT) optimality conditions for agent $i$'s UMP consist of primal feasibility, dual
 feasibility and zero duality gap.
-A solution to the exhcange MEP~(\ref{p-mep})
+A solution to the exchange MEP~(\ref{p-mep})
 is given by an allocation for each agent which satisfies that
-agent's UMP optimality condtions, such that the demand of the goods
+agent's UMP optimality conditions, such that the demand of the goods
 does not exceed the supply.
 Thus, we can write the KKT conditions of the exchange MEP as
 \begin{equation}
