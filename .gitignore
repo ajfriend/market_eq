@@ -5,4 +5,9 @@
 *.log
 *.toc
 .texpadtmp
-market_eq*.pdf
+market_eq.pdf
+market_eq_long.pdf
+*.bbl
+*.blg
+*.fdb_latexmk
+*.synctex.gz

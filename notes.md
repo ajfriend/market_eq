@@ -31,7 +31,7 @@
 
 # Mon Sep  1 23:21:42 2014
 - some CES functions work for Arrow-Debreu, but might require a different convex program. look at section 6.4.2 in Algorithmic Game Theory
-- also look at Market Equilibrium for CES Exchange Economies: Existence, Multiplicity, and Computation 
+- also look at Market Equilibrium for CES Exchange Economies: Existence, Multiplicity, and Computation
 - look at CS294 lecture 7 notes. gives CES arrow debreu for -1 <= \rho < 0
 - the lecture 7 notes seem to give the arrow-debreu in terms of a demand function for each agent. is this a reasonable convex formulation? would it work for other utilities besides CES?
 - does the cutting plane give us something like the infinite LP?
@@ -162,7 +162,7 @@ the value of the aggregate excess demand is zero
 
 # Tue Sep 16 15:34:24 2014
 ## looking at a whole bunch of books from green
-- numerical methods in economics by judd mentions the arrow-debreu problem, but doesn't really solve it. 
+- numerical methods in economics by judd mentions the arrow-debreu problem, but doesn't really solve it.
 - Equilibrium Theory and Applications has a chapter by Mas-Colell. green library has it: HB145 .I59 1989. goes over monotone operators.
 
 # Wed Sep 17 01:48:57 2014
@@ -178,7 +178,7 @@ the value of the aggregate excess demand is zero
 # introduction
 # prioor work
 # solution via exponential cone solver
-# 
+#
 
 convex/concave. find a saddle point in x,p
 augmented lagrangian in u
@@ -295,7 +295,7 @@ AN APPLICATION IN THE THEORY OF GENERAL ECONOMIC EQUILIBRIUM
 - On the uniqueness of equilibrium once again
 
 # Tue Oct 28 13:21:59 2014
-- problem, properties, 
+- problem, properties,
     - utilities
 - numerical methods
     - cvxpy
@@ -338,7 +338,7 @@ to illustrate convergence of alg, solve problem instance of size 10^6.
 1 million users/ 1 millino goods, soak it in.
 data alone was 2gb to describe.
 
-average vs worst case residual. 
+average vs worst case residual.
 
 each iteration required 4 minutes on kona64
 
@@ -387,3 +387,18 @@ we will introduce the individual problem of agents, the equilibrium problem of b
 we will define both fisher and exhcange problems,
 
 then we give some computational frameworks for computing solutions to these convex problems, and provide examples.
+
+## to add
+the structure of these problems makes them hard to solve on a regular IP method. for instance, we exploit the sparisty to reduce the number of constraints and variables in the problem. however, the exponential cone is hard to handle.
+
+admm is a splitting method which will allow us to solve the problem by splitting it up into subproblems. the problem naturally splits across agents, but we could also put these into *groups* of agents if we wanted. there may be some benefit to doing this, computationally. proximal operators are dicsussed in parikh.
+
+# Wed Dec 10 16:49:30 2014
+## to add
+- why convex opt? nice framework, get a solution, can see properties of solutions, and we get to use existing solvers.
+- what is a convex problem
+- the homogeneous transformation for Fisher things
+- applications.
+- fisher traffic example? can we include flow constraints? just amount? or rate too? how do we evaluate both in the objective? maybe there's a dual trick here: max flows on the edges are a funciton of prices and budget. so the max flow is a convex program, do the dual to define the utility function in terms
+of the edge constraints.
+- discussion of other algorithms? GAMS software? tatonnement?
