@@ -1,0 +1,45 @@
+\documentclass[12pt]{article}
+%\usepackage[utf8]{inputenc}
+\usepackage{amssymb,amsmath,graphicx,url,fullpage,amsfonts,verbatim}
+\usepackage[small,bf]{caption}
+
+% add bib to ToC
+\usepackage{tocbibind}
+
+\newcommand{\tatonnement}{t\^atonnement}
+
+\input defs.tex
+
+\title{Applications}
+\author{A.J. Friend}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{list of applications}
+a list of notes of applications ot hte market stuff
+
+from \cite[p.~104]{nisan2007algorithmic} says that \cite{kelly1997charging}
+is a fisher program for TCP congestion problem. for more on these flow problems,
+see chapter 22 of the nisan book and maybe chapter 18 on routing games. maybe
+section 5.14? and this jain and vazirani paper?
+\cite[\S5.13]{nisan2007algorithmic} gives a nice little Fisher application
+to resource allocation markets, including a flow market.
+\cite[\S5.14]{nisan2007algorithmic} gives a nice example from the previous
+section of problem with a single
+source and multiple sinks. However, it ends up with edges having zero prices,
+so I don't know how that would work in the Arrow-debreu setting, but because
+this is a Fisher problem, it should be ok.
+
+\cite[\S7.5]{nisan2007algorithmic} suggests graphical exchange markets, where
+agents can only trade with other agents if they share an edge in some graph.
+for this to work, we need to allow for local good prices. but everything should
+still carry through. cool!
+
+
+\bibliographystyle{alpha}
+\bibliography{bibliography}
+
+\end{document}

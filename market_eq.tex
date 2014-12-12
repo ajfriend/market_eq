@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 %\usepackage[utf8]{inputenc}
-\usepackage{amssymb,amsmath,graphicx,url,fullpage,amsfonts,verbatim}
+\usepackage{amssymb,amsmath,graphicx,url,fullpage,amsfonts,verbatim,natbib}
 \usepackage[small,bf]{caption}
 
 % add bib to ToC
@@ -24,8 +24,8 @@ We consider the pure exchange market equilibrium problem of finding prices such
 that the market clears, \ie, demand does not exceed supply. This is a classic
 problem in economics, and has been discussed recently in the literature from a
 computational complexity perspective. Indeed, depending on the utility
-functions of the agents in the market, finding equilibrium prices can be NP-
-hard. This paper will focus on the numerical computation of equilibria for a
+functions of the agents in the market, finding equilibrium prices can be
+NP-hard. This paper will focus on the numerical computation of equilibria for a
 subset of markets whose equilibrium problem can be cast as a convex program.
 Recent advances in exponential cone solvers allow us to solve these problems as
 conic programs. We will also introduce algorithms which scale to huge markets
@@ -63,12 +63,26 @@ open problems for many years.
 The Nobel Laureates Arrow and Debreu were the first to show that equilibrium
 prices exist under mild conditions on the utility functions of agents
 \cite{arrow1954existence}. However, these proofs relied on fixed-point theorems
-and were non-constructive. As such, they offered no practical means by which to
-compute these equilibria.
+\cite[see][]{border1989fixed}
+and were initially non-constructive.
+As such, they offered no practical means by which to compute these equilibria. 
+However, Scarf and others 
+\cite{scarf1967approximation,scarf1973computation,
+scarf1982computation,eaves1972homotopies} were able to extend the fixed-point
+ideas to produce path-following algorithms to compute equilibrium prices.
+Unforunately, however, these algorithms had exponential worst-case running times.
 
-This paper will investigate convex formulations of the market equilibrium
-problem which were rediscovered by Jain \cite{jain2007polynomial}. The original
-formulations for linear utility functions %todo check
+Smale \cite{smale1976exchange,smale1976convergent} developed algorithms based
+on Newton's method, but with no polynomial running time guarantees.
+
+This paper will investigate formulations of the market equilibrium
+problem as convex optimization problems \cite{BoV:04},
+which were rediscovered by Jain \cite{jain2007polynomial}.
+This focus will restrict the types of markets we can
+consider, but the convex optimization framework will allow us to solve
+these problems efficiently and at scale.
+The original convex
+formulations for linear utility functions
 were stated by Nenakov
 and Primak \cite{nenakov1983algorithm}. Jain's convex formulation was later
 extended by Chen, Ye, and Zhang \cite{chen2007note, chen2010equilibrium} to
@@ -76,13 +90,18 @@ include some non-homogeneous utility functions.
 
 Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory,
 eisenberg1961aggregation} gave a convex program for a special case of Walras'
-model which was independently developed by Fisher. %todo citation?
-This
-restricted case allows us to handle a larger family of utility functions with
-the convex framework.
+model which was first introduced by Fisher \cite[see][]{brainard2000compute}.
+The Fisher model consists of agents purchasing goods instead of trading.
+The convex formulation of this special case will allow us to handle a larger
+family of utility functions.
 
-In this paper, we provide two algorithmic approaches to the convex formulations
-of these market equilibrium problems. The first is to capitalize on recently
+While there are huge bodies of work across several disciplines covering the
+economic interpretations, formulations, computational complexity, and
+mathematical properties of these market equilibrium problems, our focus in
+this paper is on developing efficient computational techniques to solve
+numerical instances of the given problems.
+We provide two algorithmic approaches to the convex formulations
+of these problems. The first is to capitalize on recently
 developed exponential cone solvers \cite{scs} to provide a centralized
 algorithm, easily solved with a convex modeling language, such as \cite{cvxpy,
 cvx}. The second approach is to use the \emph{alternating direction method of
@@ -132,6 +151,12 @@ functions. A special case of the exchange model is Fisher model, where agents
 start with some initial wealth, which they use to purchase goods  from a
 globally available store.
 
+Throughout the rest of the paper, $\reals^n_+$ will denote the nonnegative
+real $n$-vectors, $\reals^n_{++}$ will denote the positive real $n$-vectors,
+and inequalities between two vectors of the same size, \eg, $x \leq y$,
+will denote componentwise inequality. When it isn't ambiguous, $0$ may stand
+in for a vector of any size whose elements are all zero.
+
 \subsection{Utility function properties}
 
 The convexity of the resulting optimization problems will depend on properties
@@ -152,7 +177,7 @@ nondecreasing.
 
 An \emph{exchange market} has $m$ agents and $n$ goods where agent $i$ has an
 initial endowment of goods $b_i \in \reals_+^n$. Agent $i$ achieves utility
-$u_i(x_i) \in \reals_+$ when he is is allocated a bundle of goods $x_i \in
+$u_i(x_i) \in \reals_+$ when he is allocated a bundle of goods $x_i \in
 \reals^n_{+}$, that is, he is allocated amount $x_{ij}$ of good $j$.
 
 Given prices $p \in \reals^n_{++}$ for the goods, agent $i$ will sell his
@@ -176,6 +201,8 @@ as the \emph{demand} of agent $i$ at prices $p$.
 Formally, $x_i^\star : \reals^n_{++} \to 2^{\reals^n_+}$ is a \emph{relation},
 \emph{set-valued mapping}, or \emph{correspondence}. When the optimal bundle is
 unique, we may think of the demand as a \emph{function}.
+Many utilities will result in a unique bundle, however, the simple 
+case of the linear utility admits a demand relation.
 
 The \emph{exchange market equilibrium problem} (exchange MEP) is to find prices
 $p$ and endowments $x_i$ such that the demand for goods in the market does not
@@ -245,7 +272,7 @@ agent $i$ solves the \emph{Fisher~UMP}
 \end{array}
 \end{equation}
 Note that the only difference between problem (\ref{p-ump}) and
-(\ref{p-fisher- ump}) is that we have replaced $p^T b_i$ with $w_i$.
+(\ref{p-fisher-ump}) is that we have replaced $p^T b_i$ with $w_i$.
 
 We will again use $x^\star_i(p)$ to denote the demand relation for agent $i$,
 \ie, the set of solutions to the Fisher UMP~(\ref{p-fisher-ump}).
@@ -302,7 +329,7 @@ throughout this paper, we will only consider markets where each good is desired
 by at least one agent, and each good is provided by at least one agent. Under
 this assumption, we can follow the formulations given in
 \cite{jain2007polynomial, chen2007note, nenakov1983algorithm}, which show that
-the optimality conditions for  the exchange MEP (\ref{p-mep}) are equivalent to
+the optimality conditions for the exchange MEP (\ref{p-mep}) are equivalent to
 the conditions
 \begin{equation}
 \begin{array}{ll}
@@ -312,7 +339,10 @@ the conditions
 \end{array}
 \label{p-exchange-gp}
 \end{equation}
-for all indices $i=1,\ldots,m,\ j=1,\ldots,n$.
+for all indices $i=1,\ldots,m,\ j=1,\ldots,n$, where $\nabla u_i(x_i)$
+is any subgradient of $u_i$ at point $x_i$. That is, the optimality
+conditions hold if there exist some subgradients for which (\ref{p-exchange-gp})
+holds.
 For a proof of this equivalence, see Appendix~\ref{sec:exchange_proof}.
 
 Problem (\ref{p-exchange-gp}) is not yet in the best form to admit useful
