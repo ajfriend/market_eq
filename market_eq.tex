@@ -70,23 +70,34 @@ However, Scarf and others
 \cite{scarf1967approximation,scarf1973computation,
 scarf1982computation,eaves1972homotopies} were able to extend the fixed-point
 ideas to produce path-following algorithms to compute equilibrium prices.
-Unforunately, however, these algorithms had exponential worst-case running times.
+Unforunately, however, these algorithms have exponential worst-case running times.
 
 Smale \cite{smale1976exchange,smale1976convergent} developed algorithms based
 on Newton's method, but with no polynomial running time guarantees.
+More recently, Esteban-Bravo has suggested techniques involving
+interior point methods in a survery of computational techiques
+for equilibrium problems \cite{esteban2004computing}.
 
-This paper will investigate formulations of the market equilibrium
-problem as convex optimization problems \cite{BoV:04},
-which were rediscovered by Jain \cite{jain2007polynomial}.
-This focus will restrict the types of markets we can
-consider, but the convex optimization framework will allow us to solve
-these problems efficiently and at scale.
-The original convex
-formulations for linear utility functions
-were stated by Nenakov
-and Primak \cite{nenakov1983algorithm}. Jain's convex formulation was later
-extended by Chen, Ye, and Zhang \cite{chen2007note, chen2010equilibrium} to
-include some non-homogeneous utility functions.
+Eaves \cite{eaves1976finite} showed that the problem could be cast and solved
+as a complimentarity problem \cite{isac1992complementarity}. The PATH
+\cite{ferris2008path,ferris2000complementarity,ferris2000homotopy}
+complimentarity solver in GAMS \cite{rosenthal2004gams} is a popular tool for
+solving equilibrium problems.
+
+See \cite{codenotti2008experimental} and the references therein for a fairly
+recent survey and comparison of several computational techniques.
+
+This paper will investigate formulations of the market equilibrium problem as
+convex optimization problems \cite{BoV:04}, which were rediscovered by Jain
+\cite{jain2007polynomial}. This focus will restrict the types of markets we can
+consider, but the convex optimization framework will allow us to solve these
+problems efficiently and at scale. The original convex formulations for linear
+utility functions were stated by Nenakov and Primak
+\cite{nenakov1983algorithm}. Jain's convex formulation was later extended by
+Chen, Ye, and Zhang \cite{chen2007note, chen2010equilibrium,ye2008path} to
+include some non-homogeneous utility functions, and their proposed interior-
+point algorithms give the current fastest polynomial-time complexity bounds
+for solving the market equilibrium problem.
 
 Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory,
 eisenberg1961aggregation} gave a convex program for a special case of Walras'
@@ -95,7 +106,7 @@ The Fisher model consists of agents purchasing goods instead of trading.
 The convex formulation of this special case will allow us to handle a larger
 family of utility functions.
 
-While there are huge bodies of work across several disciplines covering the
+While there are large bodies of work across several disciplines covering the
 economic interpretations, formulations, computational complexity, and
 mathematical properties of these market equilibrium problems, our focus in
 this paper is on developing efficient computational techniques to solve
@@ -103,10 +114,21 @@ numerical instances of the given problems.
 We provide two algorithmic approaches to the convex formulations
 of these problems. The first is to capitalize on recently
 developed exponential cone solvers \cite{scs} to provide a centralized
-algorithm, easily solved with a convex modeling language, such as \cite{cvxpy,
+algorithm, easily solved within a convex modeling language, such as \cite{cvxpy,
 cvx}. The second approach is to use the \emph{alternating direction method of
 multipliers} (ADMM) \cite{boyd2011distributed} to produce a distributed and
 scalable algorithm, allowing us to tackle huge problems.
+As far as we are aware, the examples we solve are by far the largest
+numerical examples reported in the literature.
+
+
+we use sparse markets to demonstrate how much benefit we can get from exploiting sparsity in the market.
+XXX: make a note in the CVXPY section that we are exploiting sparsity and how.
+
+cvx parses the problem into a standard form, and passes it off to the SCS solver.
+
+the focus on the paper isn't on the convergence rate of the algorithm (indeed slow gradient results).
+in practce, these work really well, simple, scalable, fast in practice. falls easily into existing algorithmic technicques.
 
 \subsection{Outline}
 
