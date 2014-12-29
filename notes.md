@@ -402,3 +402,8 @@ admm is a splitting method which will allow us to solve the problem by splitting
 - fisher traffic example? can we include flow constraints? just amount? or rate too? how do we evaluate both in the objective? maybe there's a dual trick here: max flows on the edges are a funciton of prices and budget. so the max flow is a convex program, do the dual to define the utility function in terms
 of the edge constraints.
 - discussion of other algorithms? GAMS software? tatonnement?
+
+# Sun Dec 28 00:00:47 2014
+- how do we know when solutions exist?
+- why do we use convex optimization?
+- 

@@ -12,3 +12,4 @@ market_eq_long.pdf
 *.fdb_latexmk
 *.synctex.gz
 applications.pdf
+*.out
