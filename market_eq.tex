@@ -1006,7 +1006,7 @@ of the agent's UMP at prices $\Phi$.
 Note that $q_i \in [0,1]$ is a measure of the dissatisfaction of agent $i$. If
 the agent is assigned more utility (by violating his spending constraints) than
 he would get by solving his UMP, he has $q_i = 0$ dissatisfaction. On the other
-hand, if $q_i = .03$, then the bundle $x_i$ acheives
+hand, if $q_i(x_i, \Phi) = .03$, then the bundle $x_i$ acheives
 only $97\%$ of the maximum utility possible at prices $\Phi$.
 
 Using the relative residual as a measure of convergence for our iterative ADMM
@@ -1017,51 +1017,50 @@ the $q_i$ in the experiments below, we project the proposed bundles $x_i$ so
 that the assignments are positive, and their sum does not violate the global
 allocation constraint.
 
-\subsection{Centralized algorithm}
+\subsection{Examples}
+
+\paragraph{Centralized example.}
 \label{sec:centralized_examples}
 To demonstrate the centralized algorithm of \S\ref{sec:centralized},
-%todo add SCS section, fix section reference
 we generate random exchange markets ranging in size from $n=10^1$ to $n=10^3$.
 For each problem size, we generate 10 market instances to demonstrate variance
 in solve time. Figure~\ref{f-cvxpy} plots the SCS solve time as a function of
 problem size, running SCS on its default parameters, with a stopping tolerance
 of $10^{-3}$, running on a 2013 Macbook Air, with 8 gb ram and a 1.7 GHz
-processor. The same figure also provides the average and worst case relative
-residual over the agents of the market.
-
-XXX: todo for figures, make a variance plot and give error bars.
+processor. The same figure also provides the average relative
+residual over the agents of the market for each of the 10 examples.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=1.0\textwidth]{figures/cvxpy}
 \end{center}
-\caption{XXX temporary figure. For different values of numbers of agents, $n$,
-we generate 10 random instances of a market, as in \S\ref{sec:random_prob}.
-We solve each market problem with the centralized method, using SCS, and
-report the solve times and average and worst-case relative residuals, with the
-statistics taken over the agents in the market, not market instances.}
+\caption{XXX temporary figure.
+Demonstrating the centralized algorithm of \S\ref{sec:centralized}, we give the
+SCS solve times and average relative residuals of the solutions for a range of
+market sizes, with 10 example markets for each size.
+}
 \label{f-cvxpy}
 \end{figure}
 
 
-\subsection{Decentralized algorithm}
+\paragraph{Distributed example.}
 \label{sec:distributed_examples}
-To demonstrate our decentralized algorithm of \S\ref{sec:distributed},
-%todo fix section ref
+To demonstrate the distributed algorithm of \S\ref{sec:distributed},
 we solve a single random instance of size $n=10^6$ agents. At each iteration,
 we take the result of the prox operation (\ref{a-prox}) and the consensus
-prices $\Phi^k$ from (\ref{a-phibar}) and compute the average and worst-case
-relative residual over the agents in the market and record the findings in
+prices $\Phi^k$ from (\ref{a-phibar}) and compute the average
+relative residuals over the agents in the market and report the results in
 Figure~\ref{f-admm}.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=0.6\textwidth]{figures/admm}
 \end{center}
-\caption{XXX temporary figure. This figure gives results for decentralized ADMM
-algorithm applied to a single random market generated as in
-\S\ref{sec:random_prob} with $n=10$ agents. We give the average and worst-case
-statistics of the agents for their relative residuals.}
+\caption{XXX temporary figure (data actually from a small example. still need
+to run full-size example). This figure gives results for distributed ADMM
+algorithm of \S\ref{sec:distributed} applied to a single random market
+with $n=15$ agents. We report the average relative residuals as a function
+of iteration number.}
 \label{f-admm}
 \end{figure}
 
@@ -1069,7 +1068,7 @@ statistics of the agents for their relative residuals.}
 \appendix
 
 
-\section{Convex optimality conditions for exchange problem}
+\section{Optimality conditions for exchange problem}
 \label{sec:exchange_proof}
 
 In this section, we use the same definitions and notation as in
