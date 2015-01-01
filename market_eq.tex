@@ -74,7 +74,7 @@ open problems for many years.
 The Nobel Laureates Arrow and Debreu were the first to show that equilibrium
 prices exist under mild conditions on the utility functions of agents
 \cite{arrow1954existence}. However, these proofs relied on fixed-point theorems
-\cite[see][]{border1989fixed}
+(see \cite{border1989fixed})
 and were initially non-constructive.
 As such, they offered no practical means by which to compute these equilibria.
 
@@ -114,7 +114,7 @@ fastest polynomial-time complexity bounds for solving the market equilibrium
 problem.
 
 We will also consider an important special case of Walras' exchange market model,
-which was first introduced by Fisher \cite[see][]{brainard2000compute}.
+which was first introduced by Fisher (see \cite{brainard2000compute}).
 The Fisher model consists of agents endowed with
 an initial amount of wealth which they use to purchase goods instead of trading
 for them. Eisenberg and Gale \cite{eisenberg1959consensus, gale1960theory,
@@ -434,13 +434,6 @@ in the market are such that the term
 is concave for all $i$ and $j$.
 We will refer to (\ref{p-exchange}) as the \emph{exchange formulation}.
 
-Note that the first constraint in (\ref{p-exchange}) only needs to be
-explicitly formed when $\nabla_j u_i(x_i) > 0$. For example, this derivative
-will be zero if an agent has no interest in good $j$. Similarly, we only need
-to include terms in the sum inside $\log(\sum_k b_{ik} e^{\phi_k})$ when
-$b_{ik} > 0$. These ideas will be used later when we exploit sparsity to solve
-these problems efficiently.
-
 \subsection{Fisher}
 \label{sec:convex_form_fisher}
 
@@ -491,8 +484,8 @@ since
 \]
 is concave.
 
-The utility is also compatible with the Fisher formulation~(\ref{p-fisher}), as it is
-homogeneous of degree 1.
+The utility is also compatible with the Fisher formulation~(\ref{p-fisher}),
+as it is homogeneous of degree 1.
 
 
 \subsection{Constant elasticity of substitution}
@@ -612,15 +605,13 @@ the Fisher MEP.
 \section{Algorithms}
 \label{sec:algorithms}
 
-XXX: todo in both subsections of \S5 , you need to remind the reader that the
-algorithm solves the problem (assuming it has a solution)
-
-Having defined the exchange and Fisher market equilibrium problems with
-(\ref{p-mep}), and seen how they can be represented as convex programs using
-one of two formulations, (\ref{p-exchange}) and (\ref{p-fisher}), we will now
-present two approaches to solve the resulting convex problems. The first is
-centralized, and will allow us to easily express and solve small- and medium-
-sized market problems. The second is distributed, and will allow us to solve
+Recall that when the nondegenerate price assumptions of \S\ref{sec:convex_form}
+hold, convex formulations (\ref{p-exchange}) and (\ref{p-fisher}) have
+solutions which provide equilibrium prices and good allocations. 
+This section presents two algorithms to solve these convex optimization problems.
+The first is
+centralized, and will allow us to easily express and solve medium-sized market
+problems. The second is distributed, and will allow us to solve
 instances of huge markets.
 
 
@@ -629,134 +620,104 @@ instances of huge markets.
 
 Our first approach is to use a tool for disciplined convex programming (DCP)
 \cite{GBY:06,Grant2004} such as CVX \cite{cvx} in MATLAB, CVXPY \cite{cvxpy} in
-Python, or Convex.jl \cite{convex.jl} in Julia. These tools allow us to
-represent convex optimization problems in a high-level programming language
-such that the code closely resembles the original mathematical representations,
-which, in our case, are formulations (\ref{p-exchange}) and (\ref{p-fisher}).
-Each of these tools will parse the problem to transform it into a standard
-conic programming form \cite{}, which can then be passed to a conic solver
-such as \cite{scs}, which will return the solution (and dual variables, if
-requested).
+Python, or Convex.jl \cite{convex.jl} in Julia. These are general tools that
+allow us to represent convex optimization problems in a high-level programming
+language such that the code closely resembles the original mathematical
+representations, which, in our case, are formulations (\ref{p-exchange}) and
+(\ref{p-fisher}). Using these tools, atomic convex expressions are combined
+through specific DCP rules to create optimization problems which are convex by
+construction. Given a valid description of a convex optimization problem, these
+tools can then transform the problem into a standard form, that of a convex
+\emph{cone program} \cite{nn.ip}. Cone programs are a useful problem class
+because they can be efficiently solved in theory and in practice,
+and many numerical solvers exist (see the
+documentation for \cite{cvx,cvxpy,convex.jl}). A DCP tool
+will call a conic solver on the cone program, and return the solution
+to the original convex problem (and dual variables, if requested).
 
-When the nondegenerate price assumptions of \S\ref{sec:convex_form} hold, this
-sequence will solve both the exchange and Fisher convex formulations,
-which will provide equilibrium prices and allocations of goods.
+While conic solvers have existed for some time, it is only due to recent
+advances \cite{scs,ecos-exp} that we are able to solve the convex formulations
+(\ref{p-exchange}) and (\ref{p-fisher}) with these tools. The relevant
+difficulty is that the convex formulations involve exponential and logarithmic
+functions. These functions are not representable within the standard classes of
+cone programming (LP, SOCP, or SDP) targeted by most cone solvers. The solvers
+SCS \cite{scs} and ECOS-Exp \cite{ecos-exp} extend the numerically solvable
+problems to \emph{exponential cone} programs---which are able to handle these
+functions---and solve formulations (\ref{p-exchange}) and (\ref{p-fisher}).
 
-The data required to describe the market are the initial allocations of goods,
-and expressions based on the utility functions. The Fisher formulation is easier,
-as for (\ref{sec:convex_form_fisher}), we just need to represent the 
-logarithm of the utility functions. For the exchange formulation
-(\ref{sec:convex_form_exchange}), we need to provide the terms arising
-from expression (\ref{e-util-constraint}), which are more involved. However,
-these are derived in \S\ref{sec:util_funcs}.
+Solving a Fisher or exchange MEP is thus as easy as representing the problem
+formulations (\ref{p-exchange}) or (\ref{p-fisher}) within a DCP tool and
+calling a solve method. The data need to represent are given by the initial
+endowments of goods or wealth, and the agent utility functions. In the Fisher
+case, we need to represent the term $\log u_i(x_i)$, which is usually
+straightforward. The exchange case is more involved, but the representations of
+the terms (\ref{e-util-constraint}) are given in \S\ref{sec:util_funcs} for
+each utility function that we consider. The equilibrium endowments of goods for
+each agent are recovered from the solution and the equilibrium prices are recovered
+from the log-prices in (\ref{p-exchange}) in the exchange case. In the Fisher
+case, prices are recovered as the dual variables of the constraint $\sum_{i=1}^m
+x_i \leq B$ in (\ref{p-fisher}).
 
-The hardest work in solving these equilibrium problems is done by the 
-cone programming solver. Recent advances in conic programming
-solvers such as SCS \cite{scs} and ECOS-Exp are what allow us to
-solve our market equilibrium problems. All of the convex
-formulations discussed in this paper involve exponential
-or logarithmic functions. Until recently, most cone solvers
-could not handle such functions. SCS was one of the first solvers
-to natively handle the exponential cone, allowing these functions
-to be represented and the problems involving them
-efficiently solved.
+By exploiting natural sparsities in the markets,
+(\ref{p-exchange}) and (\ref{p-fisher}) can be represented with fewer variables
+and constraints, allowing us to solve larger problems. For example,
+in (\ref{p-exchange}), the first constraint 
+\[
+\log(\nabla u_i(x_i)^T x_i) - \log(\nabla_j u_i(x_i)) + \phi_j 
+\geq \log(\sum_k b_{ik} e^{\phi_k})
+\]
+only needs to be formed when agent $i$ has some interest in good $j$.
+If not, then $\nabla_j u_i(x_i) \equiv 0$, and the constraint is always satisfied.
+In addition, if agent $i$ has no interest in good $j$, then we do not
+need to include the variable $x_{ij}$ in our model, since we know it will
+be zero. We also only need to include terms in the sum inside
+$\log(\sum_k b_{ik} e^{\phi_k})$ when $b_{ik} > 0$. To implement these ideas,
+we can use sparse vector data structures to represent each $x_i$.
 
+The solvers SCS and ECOS-Exp are run on a single machine (possibly multi-core)
+and will scale up to medium-sized problems. We give examples 
+using CVXPY and SCS in \S\ref{sec:centralized_examples}
+up to thousands of goods and agents, which are, to our knowledge,
+the largest numerical instances solved in the literature.
 
-why cone programming? we use conic programming as opposed to more
-general nonlinear optimization solvers because.
+We solve even larger market problems in \S\ref{sec:distributed_examples}
+using an algorithm described in the next section.
 
-
-amazing that the parser does work for us. only thanks to exponential cone solvers
-can we find the solution. this is a recent development.
-this just works for small and medium scale problems.
-
-also, when representing the problem using this tool, use
-the representations of section 4 to give you the hard expressions.
-
-
-
-what functions, what assumptions, and how do we model them? we use the 
-representations given in the previous section.
-
-in either formulation for fisher or exchange, this centralized algorithm will
-solve the problem. we again assume that the goods are such that everybody wants
-something and every thing is provided by someone....
-
-
-The fisher formulation is the easiest. we simply write down the problem (2),
-taking the logarithm of the objective functions, which turns out to be convex
-by composition rules (concave?). The equilibrium prices for hte goods can 
-be recovered as the dual variables to the constraint $\sum x_i \leq B$.
-
-For the exchange formulation, we write out the problem (3), and using the
-formulations in section 4 to give the representations for the 
-utility term (6).
-
-a tool such as CVX, CVXPY, or convex.jl can then parse the formulation,
-transform it into a socp-exp program, and then pass it off to the solver.
-this uses the DCP framework.
-
-recent advances in convex solvers are what will allow us to solve this problem
-easily as a cone program. conic programming has nice guarantees, 
-can use interior point methods, or SCS. no other approach that we know of
-has been able to solve the MEP directly as an exponential cone program. 
-what are the benefits of this?
-
-note that in describing the problem in a DCP framework, there are nominally
-more constraints that the program explicitly needs. especially in the case
-of markets with a certain sparsity, in that agents only have some goods
-and are only interested in some goods, we can reduce the number of inequalities
-needed to express the problem by exploiting this sparsity.
-
-
-XXX: todo we also talked about explaining more about the centralized algorithm.    you
-can cite CVX and the papers that describe canonicalization and DCP.
-XXX: make a note about exploiting sparisty
-XXX: talk about DCP and canonicalization. cone representation, exponential cones.
-XXX: at this piont in the paper, we see why these are only recently solvable.
-XXX: cvx parses the problem into a standard form, and passes it off to the SCS
-solver.
-
-As the market equilibrium problems given by (\ref{p-exchange}) and
-(\ref{p-fisher}) are convex, one might expect that they could be easily
-formulated and solved with currently available modeling frameworks and
-optimization solvers. This is indeed the case, but only due to recent advances
-in convex solvers, such as with SCS \cite{scs} and ECOS-Exp. %todo cite
-For the first time, these solvers can handle exponential cone constraints,
-which are needed to represent the logarithm and exponential functions found in
-formulations (\ref{p-exchange}) and (\ref{p-fisher}).
-
-We can describe these market equilibrium problems easily using the modeling
-framework CVXPY \cite{cvxpy}, and solve the models using SCS.
-\S\ref{sec:centralized_examples} will give computational results for moderately
-sized problems. Indeed, these are the largest general market equilibrium
-problems we have seen solved in the literature. However, for much larger
-problems, we will be limited by solving these problems in a centralized
-fashion. The next section will describe distributed methods which will scale to
-arbitrarily large problems.
+by breaking our MEP
+into many smaller subproblems that we can distribute and solve inside an iteration that
+converges to a solution. The subproblems will themselves
+be convex optimization problems which involve exponentials and
+logarithms, and so we will again utilize exponential
+cone solvers such as SCS and ECOS-Exp.
 
 
 \subsection{Distributed ADMM algorithm}
 \label{sec:distributed}
 
-The prox operators (ref) here are complex and will require an optimization
-solver to evaluate. thus, this method will rely on the exponential cone
-solvers discussed in the last section.
+We can compute solutions to both the Fisher and exchange convex formulations,
+problems (\ref{p-fisher}) and (\ref{p-exchange}), using the alternating
+direction method of multipliers (ADMM) \cite{boyd2011distributed}. Roughly, we
+split the convex formulation of our MEP into many smaller convex subproblems
+(\eg, one per agent) and distribute the subproblems (among, for example, a cluster
+of machines).
+Each subproblem can then be solved in parallel with a DCP tool and a cone solver.
+The subproblems will again involve exponentials and logarithms, and so we will
+utilize the recent cone solvers mentioned in the last section.
+We then collect the solutions in a central location,
+compute some simple averages and sums, and distribute updated
+information to each of the subproblems.
+We continue this iterative process to produce iterates which converge
+to a solution to the original convex problem.
+ADMM allows us to solve a convex problem which may be too large to fit on
+a single machine by iteratively solving many smaller convex problems in parallel.
 
-XXX: todo introduce prox operators?
-XXX: explain how to use dcp (last section) to solve small problems in second section.
+While ADMM has a slow worst-case convergence rate typical of first-order
+optimization methods, we find that it works surprisingly well in practice
+(particularly when only a few digits of precision are required), and so we
+use it to obtain a simple, scalable, and fast numerical method.
 
-the focus on the paper isn't on the convergence rate of the algorithm (indeed
-slow gradient results). in practce, these work really well, simple, scalable,
-fast in practice. falls easily into existing algorithmic technicques.
-
-
-We can compute solutions to both the Fisher and
-exchange convex formulations, problems (\ref{p-fisher}) and (\ref{p-exchange}),
-using the alternating direction method of multipliers (ADMM)
-\cite{boyd2011distributed, parikh2013proximal}.
-
-We'll see that we can put both problems into the ADMM-compatible form
+To formulate the algorithm, we first note that we can put both (\ref{p-fisher}) and (\ref{p-exchange}) into
+the ADMM-compatible form
 \begin{equation}
 \label{p-admm}
 \begin{array}{ll}
@@ -765,7 +726,10 @@ We'll see that we can put both problems into the ADMM-compatible form
 & \phi_i = \Phi, \quad i=1,\ldots,m
 \end{array}
 \end{equation}
-for appropriately chosen functions $f_i$. Recall that the vector $B \in
+for appropriately chosen functions $f_i$. Each $f_i$ will
+correspond to an agent's constraints and objective terms, and will
+demarcate the splitting of the computational work to be done in
+our distributed algorithm. Recall that the vector $B \in
 \reals^n_{++}$ gives the total amount of goods available in the market. In the
 Fisher problem, $B$ is given. In the exchange problem, $B = \sum_i b_i$. The
 variables $x_i$ give the local allocations for agent $i$, and $\phi_i \in
@@ -773,12 +737,66 @@ variables $x_i$ give the local allocations for agent $i$, and $\phi_i \in
 newly introduced consensus variable $\Phi$. (In the Fisher formulation, $f_i$
 will not depend on $\phi$.)
 
+Each $f_i$ will correspond to a subproblem to be solved in the ADMM algorithm.
+For simplicity, we define each $f_i$ to involve a single agent. A more general
+splitting might group agents together or break down the problem firther (by
+splitting across goods), depending on the size of the subproblems we wish to
+solve.
+
 In the remainder of this subsection, we describe the $f_i$ functions for the
-exchange and Fisher formulations, and provide a general ADMM implementation
-which solves both cases.
+exchange and Fisher formulations, provide a general ADMM implementation that
+solves both cases, and explain the types of subproblems within the iteration.
+
+\paragraph{Extended-value functions and proximal operators.}
+The following generalization of real-valued functions is central to convex
+analysis, and will be useful in simplifying the notation in the description
+of our algorithm.
+
+An \emph{extended-value} convex function (see \cite{BoV:04}) is a function 
+$f: \reals^n \to \reals \cup \{\infty\}$, whose range includes
+positive infinity. 
+For example, extended-value indicator function of a convex set $C$ is
+\[
+I_C (x) =
+\begin{cases}
+0 & x \in C\\
+\infty & x \not\in C.
+\end{cases}
+\]
+We can use extended-value functions to include constraints in objective functions within
+optimization problems. For example,
+we can rewrite
+\begin{equation*}
+\begin{array}{ll}
+\mbox{minimize} & f(x) \\
+\mbox{subject to} & x \in C
+\end{array}
+\end{equation*}
+as just 
+\[
+\mbox{minimize}\ f(x) + I_C(x).
+\]
+
+For an extended-value convex function
+$f: \reals^n \to \reals \cup \{\infty\}$,
+the \emph{proximal operator} \cite{parikh2013proximal}
+$\mbox{prox}_{f} : \reals^n \to \reals^n$
+is given by
+\begin{equation}
+\label{p-prox}
+\mbox{prox}_f(y) = \mbox{argmin}\ f(x) + \frac{1}{2}\|x - y\|_2^2.
+\end{equation}
+The heavy lifting in the ADMM algorithm below
+will be in evaluating $\mbox{prox}_{f_i}$, which will be done
+by solving the convex program given in (\ref{p-prox}). Since the $f_i$ involve
+utility expressions and constraints from the original convex formulations
+(\ref{p-fisher}) and (\ref{p-exchange}), which include
+exponential and logarithmic terms, we will use the exponential cone solvers
+mentioned in the last section to evaluate the proximal operators.
+
 
 \paragraph{Fisher.}
-We can simply assign
+For the Fisher formulation, we can define the extended-value convex function
 \[
 f_i(x_i, \phi) = -w_i \log u_i(x_i) + I_{\lbrace x \mid x \geq 0 \rbrace}(x_i),
 \]
@@ -788,8 +806,7 @@ With this definition, problem~(\ref{p-admm}) is equivalent to
 problem~(\ref{p-fisher}).
 
 \paragraph{Exchange.}
-
-For agent $i$, let $f_i(x_i, \phi)$ be the indicator function for the
+For agent $i$ in the exchange formulation, let $f_i(x_i, \phi)$ be the indicator function for the
 constraints
 \[
 \begin{array}{c}
@@ -806,8 +823,8 @@ With this definition, problem~(\ref{p-admm}) is equivalent to problem~(\ref{p-ex
 We can use an ADMM-based splitting method \cite{boyd2011distributed} to solve
 either an exchange or Fisher market equilibrium problem written in the form of
 problem~(\ref{p-admm}). We will be interested in exploiting sparsity in the
-market, such as each agent only being interested buying and selling a small
-subset  of all the possible goods. For this purpose, we will introduce an
+market, such as each agent only being interested in buying and selling a small
+subset of all the possible goods. For this purpose, we will introduce an
 indexing notation in this section which is more suitable to represent this
 sparsity and will simplify our resulting ADMM equations.
 
@@ -830,12 +847,8 @@ the goods.
 Agent $i$ is also initially endowed with a set of goods
 $H_i \subset \mathcal{G}$,
 with allocation values $(b_i)_g = b_{ig}$, where $b_i \in \reals_{++}^{|H_i|}$.
-Again, $B \in \reals^n_{++}$ will be the total amount of goods in the market,
-which, in our current notation, we can represent as
-\[
-B_g = \sum\limits_{i \in H^{-1}_g} b_{ig}
-\]
-for each good $g \in \mathcal{G}$.
+Again, $B \in \reals^{|\mathcal{G}|}_{++}$ will be the total amount of goods in the market.
+
 
 We will treat $G$ and $H$ as \emph{relations}, using subscript notation instead
 of function notation. As we have seen, $G_i$ corresponds to the set of goods
@@ -844,29 +857,31 @@ also allow us to write $G^{-1}_g$ to denote the set of agents which are
 interested in purchasing good $g$. Similarly, $H^{-1}_g$ is the set of agents
 initially endowed with some positive amount of good $g$. Note that
 \[
-\bigcup_{i=1}^n G_i = \bigcup_{i=1}^n H_i = \mathcal{G}.
+\bigcup_{i=1}^n G_i = \bigcup_{i=1}^n H_i = \mathcal{G},
 \]
+and that
+\[
+B_g = \sum\limits_{i \in H^{-1}_g} b_{ig},
+\]
+for each good $g \in \mathcal{G}$.
 
 In the ADMM algorithm, agent $i$ will have a local opinion for the prices
 of the goods he is interested in purchasing or selling.
 We represent his local log-prices
-by $\phi_i \in \reals_+^{|G_i \cup H_i|}$.
-
-
+by $\phi_i \in \reals^{|G_i \cup H_i|}$.
 
 For any variable $z \in \reals^{|\mathcal{G}|}$ which contains values for
-each good in the market, we may write $z_{G_i}$ to represent the subvector
+each good in the market, we will write $z_{G_i}$ to represent the subvector
 of $z$ whose elements correspond to the goods in $G_i$.
 
 \paragraph{ADMM problem form.}
 
-The problem we'd like to solve is given by (\ref{p-admm}), but we'll rewrite it
-here using our new notation, which takes into account that each agent will be
-interested in a different subset of goods. We will also replace the inequality
-constraint on purchased goods with an equality, since this simplifies the ADMM
-iteration, and we know that the constraint is tight at equilibrium (see
-\S\ref{sec:exchange_proof}).
-The reformulated problem is
+The problem we are interested in solving is given by (\ref{p-admm}), but we
+will rewrite it here using our new notation, which takes into account that each
+agent will be interested in a different subset of goods. We will also replace
+the inequality constraint on purchased goods with an equality, since this
+simplifies the ADMM iteration, and we know that the constraint is tight at
+equilibrium (see \S\ref{sec:exchange_proof}). The reformulated problem is
 \begin{equation}
 \begin{array}{ll}
 \mbox{minimize} & \sum_i f_i(x_i, \phi_i) \\
@@ -881,74 +896,79 @@ goods purchased by agents must equal the total initial endowed amount. The
 second set of constraints are consensus constraints on the price variables,
 $\phi_i$. Each agent will have an opinion on the price of a good if he is
 buying or selling it. The constraint says that all agents with an opinion,
-$\phi_{ig}$, on the price of good $g$ must agree. They agree through a global
-consensus variable $\Phi_g$.
+$\phi_{ig}$, on the price of good $g$ must agree (through the global
+consensus variable $\Phi_g$).
 
 
 \paragraph{ADMM algorithm.}
 
 Using the nomenclature given in \cite{boyd2011distributed}, problem
-(\ref{p-admm2}) is a generalized consensus problem in the price variables,
-$\phi$, and a generalized sharing problem in the allocation variables, $x$.
+(\ref{p-admm2}) is a \emph{generalized consensus} problem in the price variables,
+$\phi$, and a \emph{generalized sharing} problem in the allocation variables, $x$.
 
-The iterates of the resulting ADMM algorithm are given by
+Via a derivation similar to the examples in \cite{boyd2011distributed},
+the iterates of the ADMM algorithm to solve (\ref{p-admm2}) are given by
 \begin{align}
 \label{a-xtild}
 \tilde{x}^k_g &:= \frac{1}{|G^{-1}_g|} \left( \sum_{i \in G^{-1}_g} x^k_{ig} - \sum_{i \in H^{-1}_g} b_{ig}\right)\\
 \label{a-phibar}
 \bar{\phi}^k_g &:= \frac{1}{ |G^{-1}_g \cup H^{-1}_g| } \sum_{i \in G^{-1}_g \cup H^{-1}_g}\phi^k_{ig}\\
+\label{a-u}
 u^{k+1} &:= u^k + \tilde{x}^k\\
+\label{a-w}
 w_i^{k+1} &:= w_i^k + \phi^k_i - \bar{\phi}^k_{G_i}\\
 \label{a-prox}
 x_i^{k+1}, \phi_i^{k+1} &:= \mbox{prox}_{f_i}(x_i^k - \tilde{x}^k_{G_i} - u^{k+1}_{G_i},
 \bar{\phi}^k_{G_i} - w_i^{k+1}).
 \end{align}
 
-This algorithm needs to be explained. In equation~(\ref{a-xtild}),
-$\tilde{x}^k_g$ gives a measure of the violation of the global resource
-constraint, normalized by the number of agents participating in considering
-that good. In equation~(\ref{a-phibar}), $\bar{\phi}^k_g$ gives the average of
-the price opinions $\phi^k_g$ over all agents with an interest in the price of
-good $g$. Dual variables $u^k$ and $w^k_i$ are updated in the next two
-equations. Note that $\tilde{x}^k$, $\bar{\phi}^k$, and $u^k$ are \emph{global}
-variables and that $w_i^k$, $x_i^{k+1}$, and $\phi_i^{k+1}$ are \emph{local}
-variables for each agent. In equation~(\ref{a-prox}), each agent evaluates the
-proximal operator related to his local function $f_i$. The input to this
-proximal operator is formed by combining local and global variables. For
-example, since $\tilde{x}^k$ is a global variable with values for each good in
-the market, we use the notation $\tilde{x}^k_{G_i}$ to denote the subset of
-this vector corresponding to goods in $G_i$. Each agent emits the results of
-their proximal operator and the global computation of $\tilde{x}^{k+1}_g$ and
-$\bar{\phi}^{k+1}_g$ continues in the next step.
+The iteration is initialized with $x^0_i \in \reals^{|G_i|}, \phi^0_i, w^0_i
+\in \reals^{|G_i \cup H_i|}$, for each agent $i$, and a dual variable vector
+$u^0 \in \reals^{|\mathcal{G}|}$. Iterating the steps above produce iterates
+$x^k_i$ which converge to a solution to (\ref{p-admm2}), while the $\phi^k_i$
+converge to the market equilibrium log-prices. Steps (\ref{a-xtild}--\ref{a-w})
+are simple summing and averaging steps, which are computed after collecting the
+outputs of (\ref{a-prox}) in a central location. The hard work in the algorithm
+is in the evaluation of the proximal operators in (\ref{a-prox}), which can be
+done in parallel for each agent $i$.
 
-The algorithm above is distributed and parallelizable. Each agent can compute
-their proximal operator separately and in parallel. The results of these
-proximal operators are aggregated, averaged, and then distributed back to the
-individual agents for the next iteration.
+We'll explain the steps in the iteration above in some more detail. In (\ref{a-xtild}),
+$\tilde{x}^k_g$ gives the average violation in good $g$ of the global resource
+constraint, where the average is taken over only the agents possibly interested
+in purchasing that good. In (\ref{a-phibar}), $\bar{\phi}^k_g$ gives the
+average of the price opinions $\phi^k_g$ over all agents with an interest in
+the price of good $g$. Dual variables $u^k$ and $w^k_i$ are updated in
+(\ref{a-u}) and (\ref{a-w}). Note that $\tilde{x}^k$, $\bar{\phi}^k$, and $u^k$
+are \emph{global} variables and that $w_i^k$, $x_i^{k+1}$, and $\phi_i^{k+1}$
+are \emph{local} variables for each agent. In (\ref{a-prox}), each
+agent evaluates the proximal operator related to his local function $f_i$. The
+input to this proximal operator is formed by combining local and global
+variables. For example, since $\tilde{x}^k$ is a global variable with values
+for each good in the market, we use the notation $\tilde{x}^k_{G_i}$ to denote
+the subvector corresponding to goods in $G_i$. Each agent emits the results of
+their proximal operator, these results are aggregated
+in a central location, and the iteration continues with (\ref{a-xtild}).
+
+We give examples and show convergence plots for huge markets in
+\S\ref{sec:distributed_examples}.
 
 
-\section{Examples}
+\section{Numerical experiments}
 \label{sec:examples}
 \subsection{Problem data generation}
 \label{sec:random_prob}
 
-XXX: todo: we use sparse markets to demonstrate how much benefit we can get from
-exploiting sparsity in the market. XXX: make a note in the CVXPY section that
-we are exploiting sparsity and how.
-
-XXX: todo talked about getting rid of the worst-case relative error; it’s distracting.
-we also talked about exactly what plots to show, but now i’ve forgotten what
-they would be.
-
-
 We will generate random exchange market instances to test our algorithms. We
 describe the generation procedure here. The random markets in these tests will
 be parameterized by a single number, $n$, which will be both the number of
-agents and the number of goods in the market.
+agents and the number of goods in the market. Each agent will be interested in
+purchasing $r = \min(n,20)$ goods, and will have an initial endowment of $r$
+goods. We limit the number of goods to demonstrate the benefit of exploiting
+sparsity in our models.
 
-Each agent will have a utility function involving $r = \min(n,20)$ goods. We
-choose this set of goods for each agent by randomly selecting $r$ distinct
-goods from the pool of $n$ possible goods. The utility function of the agent
+Each agent's utility function will involve
+a random subset of $r$ distinct
+goods selected from the pool of $n$ possible goods. The utility function of the agent
 has an equal chance of  being either of the fractional power or logarithmic
 form. The parameters for the utility functions, $a_i$, $c_i$, and possibly
 $d_i$ will be drawn from a uniform distribution on $[0,1]$ for each good. Note
@@ -956,46 +976,46 @@ that the fractional power and logarithmic utilities include linear, CES, and
 Cobb-Douglas utilities as special cases, so we consider this family of random
 utilities to be reasonably general.
 
-Each agent will also be endowed with nonzero amounts of $r$ goods. The set of
-$r$ goods will again be drawn from the pool of $n$ without replacement, and the
-initial endowment of the resulting goods will be drawn from a uniform
-distribution on $[0,1]$.
+Each agent's intial endowment of $r$ distinct goods will also be drawn
+from the pool of $n$ possible goods. The value of the endowments
+will be drawn from a uniform distribution on $[0,1]$.
 
-To ensure that equilibrium prices are meaningful, we will assign the random
-subsets of goods for utility functions and initial endowments in such a way
-that every good is desired by at least one agent, and every good is provided by
+We generate the data in such a way that the nondegenerate price assumptions
+of \S\ref{sec:convex_form} are satisfied. In particular,
+each good is desired by at least one agent, and each good is provided by
 at least one agent.
 
 \subsection{Relative residuals}
 
 To evaluate our computational experiments, we propose a measure of the relative
 \emph{dissatisfaction} of an agent in a market, for when the agent is given a
-proposition for log-prices $\Phi$ and an bundle of goods $x_i$. That is, for
-any bundle of goods and proposed log-prices, we will compare the utility
-assigned to an agent via its assigned bundle, $x_i$, with the maximum utility
-the agent could achieve by solving his UMP at the given prices $\Phi$.
+proposition for log-prices $\Phi$ and a bundle of goods $x_i$. That is, for any
+bundle of goods and proposed log-prices, we will compare the utility assigned
+to an agent via its assigned bundle, $x_i$, with the maximum utility the agent
+could achieve by solving its UMP, (\ref{p-ump}) or (\ref{p-fisher-ump}), at the
+given prices $\Phi$.
 
-For agent $i$, with prescribed bundle $x_i$ and global log-prices $\Phi$,
+For agent $i$, with utility $u_i$, prescribed bundle $x_i$, and global log-prices $\Phi$,
 we define the \emph{relative residual} to be
 \[
-q_i(x_i, \Phi)= \max\left(0,1-\frac{u_i(x_i^k)}{u_i(x_i^\star(\Phi^k))}\right).
+q_i(x_i, \Phi)= \max\left(0,1-\frac{u_i(x_i)}{u_i(x_i^\star(\Phi))}\right),
 \]
+where $u_i(x_i^\star(\Phi))$ is understood to be the optimal value
+of the agent's UMP at prices $\Phi$.
+
 Note that $q_i \in [0,1]$ is a measure of the dissatisfaction of agent $i$. If
 the agent is assigned more utility (by violating his spending constraints) than
 he would get by solving his UMP, he has $q_i = 0$ dissatisfaction. On the other
-hand, if, for instance, he has $q_i = .03$, then he has only been assigned
-$97\%$ of his maximum possible utility at the given prices.
+hand, if $q_i = .03$, then the bundle $x_i$ acheives
+only $97\%$ of the maximum utility possible at prices $\Phi$.
 
 Using the relative residual as a measure of convergence for our iterative ADMM
-algorithm only makes sense if we project a proposed solution onto positivity of
-$x_i$ and global resource availability constraints. Otherwise, we could assign
-each agent an arbitrarily large bundle of goods and achieve 0 dissatisfaction.
-Thus, in the experiments below, we will transform the proposed bundles $x_i$ so
+algorithm only makes sense if the constraints $x_i \geq 0$ and $\sum_i x_i \leq
+B$ are satisfied. Otherwise, we could assign an arbitrarily large bundle of
+goods  to each agent and achieve $0$ dissatisfaction. Thus, before evaluating
+the $q_i$ in the experiments below, we project the proposed bundles $x_i$ so
 that the assignments are positive, and their sum does not violate the global
 allocation constraint.
-
-In the experimental results given, we will plot both the worst-case and average
-relative residual (both taken over all the agents in the market).
 
 \subsection{Centralized algorithm}
 \label{sec:centralized_examples}
@@ -1025,7 +1045,7 @@ statistics taken over the agents in the market, not market instances.}
 
 
 \subsection{Decentralized algorithm}
-
+\label{sec:distributed_examples}
 To demonstrate our decentralized algorithm of \S\ref{sec:distributed},
 %todo fix section ref
 we solve a single random instance of size $n=10^6$ agents. At each iteration,
