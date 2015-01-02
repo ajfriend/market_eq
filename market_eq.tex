@@ -7,10 +7,10 @@
 \usepackage{tocbibind}
 
 \newcommand{\tatonnement}{t\^atonnement}
-\newtheorem{assumption}{Assumption}
 
 \input defs.tex
 
+%\usepackage{spelling}
 \usepackage[pdftex]{hyperref}
 
 \title{Computing Market Equilibria via Convex Optimization}
@@ -82,19 +82,19 @@ Later, Scarf and others
 \cite{scarf1967approximation,scarf1973computation,
 scarf1982computation,eaves1972homotopies} were able to extend the fixed-point
 ideas to produce path-following algorithms to compute equilibrium prices.
-Unforunately, however, these algorithms have exponential worst-case running times.
+Unfortunately, however, these algorithms have exponential worst-case running times.
 
-These intial results were followed by many new and varied computational
+These initial results were followed by many new and varied computational
 approaches to the market equilibrium problem.
 Smale \cite{smale1976exchange,smale1976convergent} developed algorithms based
 on Newton's method, but with no polynomial running time guarantees.
 More recently, Esteban-Bravo has suggested techniques involving
-interior point methods in a survery of computational techiques
+interior point methods in a survey of computational techniques
 for equilibrium problems \cite{esteban2004computing}.
 Eaves \cite{eaves1976finite} showed that the problem could be cast and solved
-as a complimentarity problem \cite{isac1992complementarity}. The PATH
+as a complementarity problem \cite{isac1992complementarity}. The PATH
 \cite{ferris2008path,ferris2000complementarity,ferris2000homotopy}
-complimentarity solver in GAMS \cite{rosenthal2004gams} is a popular tool for
+complementarity solver in GAMS \cite{rosenthal2004gams} is a popular tool for
 solving equilibrium problems.
 This short history of computational approaches is, of course, incomplete.
 See \cite{codenotti2008experimental} and \cite{nisan2007algorithmic}
@@ -335,7 +335,7 @@ As the Fisher MEP is a special case of the exchange MEP, Arrow and Debreu's
 result guarantees that equilibrium prices exist.
 Computationally, we may cast a Fisher MEP as an exchange MEP and find equilibrium
 prices using the exchange formulation to be given in
-\S\ref{sec:convex_form_exchange}, if the utiility functions are compatible.
+\S\ref{sec:convex_form_exchange}, if the utility functions are compatible.
 
 However, the Fisher problem will also admit another convex model (to be
 given in \S\ref{sec:convex_form_fisher}) which will extend the class of
@@ -605,6 +605,12 @@ the Fisher MEP.
 \section{Algorithms}
 \label{sec:algorithms}
 
+While some algorithms for the MEP are not always guaranteed to converge to a solution
+(such as \tatonnement), do not have polynomial running time guarantees,
+are not amenable to distributed computation, or do not scale to very large markets,
+we achieve each of these goals with our algorithms by using the framework
+of convex optimization.
+
 Recall that when the nondegenerate price assumptions of \S\ref{sec:convex_form}
 hold, convex formulations (\ref{p-exchange}) and (\ref{p-fisher}) have
 solutions which provide equilibrium prices and good allocations. 
@@ -676,19 +682,12 @@ we can use sparse vector data structures to represent each $x_i$.
 
 The solvers SCS and ECOS-Exp are run on a single machine (possibly multi-core)
 and will scale up to medium-sized problems. We give examples 
-using CVXPY and SCS in \S\ref{sec:centralized_examples}
+using CVXPY and SCS in \S\ref{sec:examples}
 up to thousands of goods and agents, which are, to our knowledge,
 the largest numerical instances solved in the literature.
 
-We solve even larger market problems in \S\ref{sec:distributed_examples}
+We solve even larger market problems in \S\ref{sec:examples}
 using an algorithm described in the next section.
-
-by breaking our MEP
-into many smaller subproblems that we can distribute and solve inside an iteration that
-converges to a solution. The subproblems will themselves
-be convex optimization problems which involve exponentials and
-logarithms, and so we will again utilize exponential
-cone solvers such as SCS and ECOS-Exp.
 
 
 \subsection{Distributed ADMM algorithm}
@@ -739,7 +738,7 @@ will not depend on $\phi$.)
 
 Each $f_i$ will correspond to a subproblem to be solved in the ADMM algorithm.
 For simplicity, we define each $f_i$ to involve a single agent. A more general
-splitting might group agents together or break down the problem firther (by
+splitting might group agents together or break down the problem further (by
 splitting across goods), depending on the size of the subproblems we wish to
 solve.
 
@@ -763,9 +762,8 @@ I_C (x) =
 \infty & x \not\in C.
 \end{cases}
 \]
-We can use extended-value functions to include constraints in objective functions within
-optimization problems. For example,
-we can rewrite
+We can use extended-value functions to include constraints in objective
+functions within optimization problems. For example, we can rewrite
 \begin{equation*}
 \begin{array}{ll}
 \mbox{minimize} & f(x) \\
@@ -806,8 +804,8 @@ With this definition, problem~(\ref{p-admm}) is equivalent to
 problem~(\ref{p-fisher}).
 
 \paragraph{Exchange.}
-For agent $i$ in the exchange formulation, let $f_i(x_i, \phi)$ be the indicator function for the
-constraints
+For agent $i$ in the exchange formulation, let $f_i(x_i, \phi)$ be the
+indicator function for the constraints
 \[
 \begin{array}{c}
 \log(\nabla u_i(x_i)^T x_i) - \log(\nabla_j u_i(x_i)) + \phi_j \geq  \log\left(\sum_k b_{ik} e^{\phi_{k}}\right)\\
@@ -847,7 +845,8 @@ the goods.
 Agent $i$ is also initially endowed with a set of goods
 $H_i \subset \mathcal{G}$,
 with allocation values $(b_i)_g = b_{ig}$, where $b_i \in \reals_{++}^{|H_i|}$.
-Again, $B \in \reals^{|\mathcal{G}|}_{++}$ will be the total amount of goods in the market.
+Again, $B \in \reals^{|\mathcal{G}|}_{++}$ gives the total amount of goods in
+the market.
 
 
 We will treat $G$ and $H$ as \emph{relations}, using subscript notation instead
@@ -950,7 +949,7 @@ their proximal operator, these results are aggregated
 in a central location, and the iteration continues with (\ref{a-xtild}).
 
 We give examples and show convergence plots for huge markets in
-\S\ref{sec:distributed_examples}.
+\S\ref{sec:examples}.
 
 
 \section{Numerical experiments}
@@ -976,7 +975,7 @@ that the fractional power and logarithmic utilities include linear, CES, and
 Cobb-Douglas utilities as special cases, so we consider this family of random
 utilities to be reasonably general.
 
-Each agent's intial endowment of $r$ distinct goods will also be drawn
+Each agent's initial endowment of $r$ distinct goods will also be drawn
 from the pool of $n$ possible goods. The value of the endowments
 will be drawn from a uniform distribution on $[0,1]$.
 
@@ -1006,7 +1005,7 @@ of the agent's UMP at prices $\Phi$.
 Note that $q_i \in [0,1]$ is a measure of the dissatisfaction of agent $i$. If
 the agent is assigned more utility (by violating his spending constraints) than
 he would get by solving his UMP, he has $q_i = 0$ dissatisfaction. On the other
-hand, if $q_i(x_i, \Phi) = .03$, then the bundle $x_i$ acheives
+hand, if $q_i(x_i, \Phi) = .03$, then the bundle $x_i$ achieves
 only $97\%$ of the maximum utility possible at prices $\Phi$.
 
 Using the relative residual as a measure of convergence for our iterative ADMM
@@ -1020,13 +1019,12 @@ allocation constraint.
 \subsection{Examples}
 
 \paragraph{Centralized example.}
-\label{sec:centralized_examples}
 To demonstrate the centralized algorithm of \S\ref{sec:centralized},
 we generate random exchange markets ranging in size from $n=10^1$ to $n=10^3$.
 For each problem size, we generate 10 market instances to demonstrate variance
 in solve time. Figure~\ref{f-cvxpy} plots the SCS solve time as a function of
 problem size, running SCS on its default parameters, with a stopping tolerance
-of $10^{-3}$, running on a 2013 Macbook Air, with 8 gb ram and a 1.7 GHz
+of $10^{-3}$, running on a 2013 Macbook Air, with 8 GB of RAM and a 1.7 GHz
 processor. The same figure also provides the average relative
 residual over the agents of the market for each of the 10 examples.
 
@@ -1044,7 +1042,6 @@ market sizes, with 10 example markets for each size.
 
 
 \paragraph{Distributed example.}
-\label{sec:distributed_examples}
 To demonstrate the distributed algorithm of \S\ref{sec:distributed},
 we solve a single random instance of size $n=10^6$ agents. At each iteration,
 we take the result of the prox operation (\ref{a-prox}) and the consensus
@@ -1187,6 +1184,8 @@ are equivalent to the constraints (\ref{e-mep-opt4}).
 We can interpret (\ref{e-spending}) as saying that each agent spends his entire
 budget in the equilibrium solution. Constraint (\ref{e-equilibrium}) says that
 there are no left-over goods at equilibrium; all goods are consumed.
+
+
 
 \newpage
 \bibliographystyle{alpha}
