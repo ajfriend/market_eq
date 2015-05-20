@@ -1185,6 +1185,140 @@ We can interpret (\ref{e-spending}) as saying that each agent spends his entire
 budget in the equilibrium solution. Constraint (\ref{e-equilibrium}) says that
 there are no left-over goods at equilibrium; all goods are consumed.
 
+\section{Other examples}
+
+\subsection{Internet traffic routing}
+
+A communication network is modeled as a directed graph with $m$ nodes, $n$
+edges, and an edge incidence matrix $A \in \mathbf{R}^{m \times n}$, with
+$A_{ij} = +1$ if edge $j$ enters node $i$, $-1$ if it exits node $i$, and 0
+otherwise. Edges have latency $l \in \mathbf{R}^n_{+}$ and maximum bandwidth
+$B \in \mathbf{R}^n_+$, which can be thought of as an edge capacity.
+
+The network is shared by $r$ agents. Agent $i$ wants to maximize the throughput
+between her source and sink nodes $s_i$ and $t_i$, using some fraction
+of each edge's maximum bandwidth. Along a single path
+between source and sink, the throughput is the minimum of the agent's usage over
+each edge (but an agent may use multiple paths and chooses among all possible
+paths from source to sink).
+
+We model this as a set of
+flows $F \in \mathbf{R}^{n \times r}_+$ along the edges.
+Let $f_i \in \mathbf{R}^n_+$ (corresponding to the $i$th column of $F$) be the
+flow of agent $i$. Flows must obey the conservation equations
+$A f_i = u_i(e_{t_i} - e_{s_i})$, where $e_i \in \mathbf{R}^m$ is the standard
+basis vector whose $i$th element is $1$. The total bandwidth (throughput) sent
+into the sink node $t_i$ by agent $i$ is $u_i \in \reals_+$.
+Note that the source and sink
+nodes can send and receive unlimited bandwidth, but the flows are constrained
+by the (shared) bandwidth of the edges in the network: $\sum f_i \leq B$.
+
+The \emph{average latency} of flow $f_i$ is given by $(l^T f_i)/u_i$. Agent $i$ will
+tolerate a maximum average latency $L_i$, resulting in the constraint
+$l^T f_i \leq u_i L_i$.
+If the network is such that no flow exists with average latency
+at most $L_i$, the flow just doesn't happen: $u_i = 0$ and $f_i = 0$.
+
+In order to allocate bandwidth to the agents in a way that accounts for their
+competing interests in limited resources, we formulate a market equilibrium
+problem. We price bandwidth on the edges with $p \in \mathbf{R}^n_+$, such that
+the cost to agent $i$ to buy an amount $f_{ij}$ of bandwidth on edge $j$ is
+given by $p_j f_{ij}$. Our goal will be to find prices $p$ so that the market
+is at equilibrium. That is, agents purchasing bandwidth at prices $p$ to
+maximize their throughput $u$ won't overload any edge in the network with more
+bandwidth than it can handle.
+
+Agent $i$ is given some amount of cash $w_i$ with which to purchase bandwidth
+$f_i$. Acting optimally, an agent will use all of the bandwidth she purchases,
+so we can equate the flow and bandwidth. The cost the agent must pay is given
+by $p^T f_i$, so she is constrained by $p^T f_i \leq w_i$.
+
+As stated, we have a Fisher equilibrium problem. Agent $i$'s utility function
+over $f_i \geq 0$ is given by
+
+$$
+\begin{array}{lll}
+  U_i(f_i) = &\mbox{maximize} & u_i \\
+  &\mbox{subject to} & A f_i = u_i(e_{t_i} - e_{s_i})\\
+  && l^T f_i \leq u_i L_i.
+\end{array}
+$$
+
+Note that $U_i$ is concave, increasing, and homogeneous of degree 1, which is
+what we need for the Fisher framework.
+
+Given prices $p$, agent $i$ will solve the optimization problem
+
+$$
+\begin{array}{ll}
+  \mbox{maximize} & U_i(f_i) \\
+  \mbox{subject to} & p^T f_i \leq w_i \\
+  & f_i \geq 0.
+\end{array}
+$$
+
+To find bandwidth allocations (and prices) which solve each agent's
+optimization problem and respect the total bandwidth constraints, we formulate
+and solve the Fisher equilibrium problem
+
+$$
+\begin{array}{ll}
+  \mbox{maximize} & \sum_i w_i\log U_i(f_i) \\
+  \mbox{subject to} & \sum_i f_i \leq B\\
+  & f_i \geq 0,
+\end{array}
+$$
+
+which we can rewrite as
+
+$$
+\begin{array}{ll}
+  \mbox{maximize} & \sum_i w_i\log u_i \\
+  \mbox{subject to} & A f_i = u_i(e_{t_i} - e_{s_i})\\
+  & l^T f_i \leq u_i L_i\\
+  & \sum_i f_i \leq B \\
+  & f_i \geq 0.
+\end{array}
+$$
+
+The equilibrium allocations are given by $f_i$ and the equilbrium prices are
+given as the dual variable to the constraint $\sum_i f_i \leq B$.
+
+XXX: maybe also add the the standard Kelley example with fixed paths.
+
+
+\subsection{Air-conditioning}
+XXX. add market-based control of air-conditioning \cite{clearwater1996market}
+control over time period. expected seasonal temps.
+hourly changes. topology of air vents and/or rooms?
+
+
+\subsection{multi-commodity flow}
+simple generalization of the traffic flow problem?
+
+\subsection{ad-auctions}
+got to be able to come up with something
+
+\subsection{netflix ranking}
+yinuy ye's idea
+
+\subsection{voting}
+compare to alternative voting systems. quadratic voting?
+
+\subsection{matching problem}
+medical residency matching
+organ donor matching
+
+\subsection{ranking/matching}
+netflix: people rank movies, movies rank people
+
+ads: people rank ads or products, advertisers rank people (or groups of people)
+based on who they want to advertise to (who they think will repsond best, or spend most)
+we do this to fill user's limited adspace (budget) with ads they want to see,
+while respecting advertisers budget and making everyone maximally happy.
+
+of course, this takes in as input users utility function for content, and advertisers
+utility function for users. these things might come from PCA or matrix completion.
 
 
 \newpage

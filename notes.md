@@ -406,4 +406,11 @@ of the edge constraints.
 # Sun Dec 28 00:00:47 2014
 - how do we know when solutions exist?
 - why do we use convex optimization?
-- 
+
+# Tue May  5 23:58:49 2015
+- YYY's ranking idea. interpret prices as rankings
+- voting? compare with quadratic voting?
+- can we infer utility functions from observed market prices? perhaps we don't even need allocations, we just need a subset of agents participating in markets with known amounts of goods and the resulting prices. we infer the utility functions. maybe do this over a period of time, so it isn't unrealistic. availability of goods changes slightly over time...
+    - actually, if we fix prices and initial amounts, we can just assume each agent has a certain amount of known cash in each market instance
+    - can we impute utilities and allocations?
+    - or, do we need to assume we have allocations?
